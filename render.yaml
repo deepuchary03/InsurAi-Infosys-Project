@@ -1,0 +1,35 @@
+# Render deployment configuration
+# This file is used by Render to build and deploy your application
+
+# Build command for backend
+buildCommand: "cd backend && mvn clean package -DskipTests"
+
+# Start command for backend
+startCommand: "cd backend && java -Dspring.profiles.active=prod -jar target/*.jar"
+
+# Environment variables needed for Render
+env:
+  - key: JAVA_OPTS
+    value: "-Xmx512m"
+  
+  - key: SPRING_PROFILES_ACTIVE
+    value: "prod"
+  
+  # Database configuration (you'll need to add these in Render dashboard)
+  - key: DATABASE_URL
+    sync: false  # Set manually in Render
+  
+  - key: DB_USERNAME
+    sync: false  # Set manually in Render
+  
+  - key: DB_PASSWORD
+    sync: false  # Set manually in Render
+  
+  - key: ADMIN_USERNAME
+    sync: false  # Set manually in Render
+  
+  - key: ADMIN_PASSWORD
+    sync: false  # Set manually in Render
+
+# Health check endpoint
+healthCheckPath: "/actuator/health"

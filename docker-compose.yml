@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: insurance_mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: insurancedb
+      MYSQL_ROOT_PASSWORD: 5025
+      MYSQL_USER: insurance_user
+      MYSQL_PASSWORD: insurance_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/create_database.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - insurance_network
+
+  # Backend Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: insurance_backend
+    restart: always
+    depends_on:
+      - mysql
+    environment:
+      # Database configuration
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/insurancedb?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 5025
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SERVER_PORT: 8081
+    ports:
+      - "8081:8081"
+    networks:
+      - insurance_network
+
+  # Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: insurance_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8081
+    networks:
+      - insurance_network
+
+volumes:
+  mysql_data:
+
+networks:
+  insurance_network:
+    driver: bridge
