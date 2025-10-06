@@ -66,40 +66,46 @@ function Login({ onLogin }) {
       <div className={`login-box ${visible ? "visible" : "hidden"}`}>
         <h2>{isRegister ? "Register" : "Login"}</h2>
         {error && <div className="error-message">{error}</div>}
-        <div className={`form-collapse ${expanded || isRegister ? "open" : ""}`}>
+        <div
+          className={`form-collapse ${expanded || isRegister ? "open" : ""}`}
+        >
           <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Username</label>
-            <input
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          {isRegister && (
             <div className="form-group">
-              <label>Role</label>
-              <select name="role" value={formData.role} onChange={handleChange}>
-                <option value="CUSTOMER">Customer</option>
-                <option value="AGENT">Agent</option>
-                <option value="ADMIN">Admin</option>
-              </select>
+              <label>Username</label>
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                required
+              />
             </div>
-          )}
-          <button type="submit" className="btn">
-            {isRegister ? "Register" : "Login"}
+            <div className="form-group">
+              <label>Password</label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            {isRegister && (
+              <div className="form-group">
+                <label>Role</label>
+                <select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                >
+                  <option value="CUSTOMER">Customer</option>
+                  <option value="AGENT">Agent</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+              </div>
+            )}
+            <button type="submit" className="btn">
+              {isRegister ? "Register" : "Login"}
             </button>
           </form>
         </div>
