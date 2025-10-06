@@ -11,3 +11,9 @@
 | 6    | Mithunraj M                | joined |
 
 #### **Mentor:** Niti-Dwivedi — Invitation sent
+<div style="display:flex;gap:10px;">
+  <h2>milestone 1 </h2>
+  <img src="./a.png" height="400px" width="500px">
+    <img src="./b.png" height="400px" width="500px">
+    <img src="./c.png" height="400px" width="500px">
+</div>
