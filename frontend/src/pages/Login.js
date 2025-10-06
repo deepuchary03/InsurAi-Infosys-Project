@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { userAPI } from "../services/api";
 
 function Login({ onLogin }) {
@@ -9,6 +9,17 @@ function Login({ onLogin }) {
     role: "CUSTOMER",
   });
   const [error, setError] = useState("");
+  const [expanded, setExpanded] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  // Trigger a slow initial appear when the component mounts
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setVisible(true);
+      setExpanded(true);
+    }, 50);
+    return () => clearTimeout(t);
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -51,10 +62,12 @@ function Login({ onLogin }) {
 
   return (
     <div className="login-container">
-      <div className="login-box">
+      <h1 className="app-heading">InsurAI</h1>
+      <div className={`login-box ${visible ? "visible" : "hidden"}`}>
         <h2>{isRegister ? "Register" : "Login"}</h2>
         {error && <div className="error-message">{error}</div>}
-        <form onSubmit={handleSubmit}>
+        <div className={`form-collapse ${expanded || isRegister ? "open" : ""}`}>
+          <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Username</label>
             <input
@@ -87,17 +100,18 @@ function Login({ onLogin }) {
           )}
           <button type="submit" className="btn">
             {isRegister ? "Register" : "Login"}
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => setIsRegister(!isRegister)}
-          >
-            {isRegister
-              ? "Already have an account? Login"
-              : "Don't have an account? Register"}
-          </button>
-        </form>
+            </button>
+          </form>
+        </div>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => setIsRegister(!isRegister)}
+        >
+          {isRegister
+            ? "Already have an account? Login"
+            : "Don't have an account? Register"}
+        </button>
       </div>
     </div>
   );
