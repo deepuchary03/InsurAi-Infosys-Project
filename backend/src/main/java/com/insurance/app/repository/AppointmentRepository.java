@@ -10,4 +10,6 @@ import java.util.List;
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
     List<Appointment> findByCustomerId(Long customerId);
     List<Appointment> findByAgentId(Long agentId);
+    // find appointments for an agent with status not equal to 'cancelled' (treat other statuses as active)
+    List<Appointment> findByAgentIdAndStatusNot(Long agentId, String status);
 }

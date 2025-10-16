@@ -16,11 +16,11 @@ function CustomerDashboard({ user, onLogout }) {
   const fetchData = async () => {
     try {
       const [agentsRes, appointmentsRes, plansRes] = await Promise.all([
-        agentAPI.getAllAgents(),
+        agentAPI.getAvailableAgents(user.id),
         appointmentAPI.getAppointmentsByCustomer(user.id),
         planAPI.getAllPlans(),
       ]);
-      setAgents(agentsRes.data);
+      setAgents(agentsRes.data || []);
       setAppointments(appointmentsRes.data);
       setPlans(plansRes.data);
     } catch (error) {

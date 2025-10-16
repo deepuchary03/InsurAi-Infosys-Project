@@ -34,6 +34,10 @@ export const userAPI = {
 
 export const agentAPI = {
   getAllAgents: () => api.get("/agents"),
+  // Fetch agents visible to customers (availability='yes' and not booked by others,
+  // or agents booked by the requesting customer)
+  getAvailableAgents: (customerId) =>
+    api.get(`/agents/available${customerId ? '?customerId=' + customerId : ''}`),
   getAgentById: (id) => api.get(`/agents/${id}`),
   createAgent: (agentData) => api.post("/agents", agentData),
   updateAgent: (id, agentData) => api.put(`/agents/${id}`, agentData),

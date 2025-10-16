@@ -12,6 +12,7 @@ import java.util.Optional;
 public class AgentService {
     @Autowired
     private AgentRepository agentRepository;
+    // appointmentRepository is no longer needed; DB-level queries in AgentRepository handle active appointments
     
     public List<Agent> getAllAgents() {
         return agentRepository.findAll();
@@ -32,5 +33,21 @@ public class AgentService {
     
     public void deleteAgent(Long id) {
         agentRepository.deleteById(id);
+    }
+
+    /**
+     * Return agents whose availability is 'yes' and who are not already appointed to other customers.
+     * If requestingCustomerId is provided, an agent is allowed if they have no active appointments
+     * or their only active appointment(s) belong to the requesting customer.
+     */
+    public List<Agent> getAvailableAgents(Long requestingCustomerId) {
+        if (requestingCustomerId == null) {
+            // when no requesting customer, return agents that are available and not booked
+            return agentRepository.findAvailableAndUnappointedAgents();
+        } else {
+            // when a requesting customer is provided, show agents visible to that customer
+            // (available to all OR booked by this customer)
+            return agentRepository.findAgentsVisibleToCustomer(requestingCustomerId);
+        }
     }
 }
