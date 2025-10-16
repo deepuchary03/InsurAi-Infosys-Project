@@ -20,7 +20,9 @@ public interface AgentRepository extends JpaRepository<Agent, Long> {
 //            "   SELECT ap.agentId FROM Appointment ap " +
 //            "   WHERE LOWER(ap.status) <> 'cancelled'" +
 //            ")")
- @Query("SELECT a FROM Agent a WHERE LOWER(a.availability) = 'yes'")
+@Query("SELECT a FROM Agent a WHERE LOWER(a.availability) = 'yes' AND a.id NOT IN (SELECT ap.agentId FROM Appointment ap WHERE LOWER(ap.status) <> 'cancelled')")
+
+//  @Query("SELECT a FROM Agent a WHERE LOWER(a.availability) = 'yes'")
     List<Agent> findAvailableAndUnappointedAgents();
 
     /**
@@ -34,7 +36,10 @@ public interface AgentRepository extends JpaRepository<Agent, Long> {
 //            "   WHERE LOWER(ap.status) <> 'cancelled' " +
 //            "     AND ap.customerId <> :customerId" +
 //            ")")
- @Query("SELECT a FROM Agent a WHERE LOWER(a.availability) = 'yes'")
+@Query("SELECT a FROM Agent a WHERE LOWER(a.availability) = 'yes' AND a.id NOT IN (SELECT ap.agentId FROM Appointment ap WHERE LOWER(ap.status) <> 'cancelled' AND ap.customerId <> :customerId)")
+
+
+//  @Query("SELECT a FROM Agent a WHERE LOWER(a.availability) = 'yes'")
     List<Agent> findAvailableAgentsAllowingCustomer(@Param("customerId") Long customerId);
 
     /**
@@ -57,6 +62,8 @@ public interface AgentRepository extends JpaRepository<Agent, Long> {
 //            "   WHERE LOWER(ap2.status) <> 'cancelled' " +
 //            "     AND ap2.customerId = :customerId" +
 //            ")")
- @Query("SELECT a FROM Agent a WHERE LOWER(a.availability) = 'yes'")
+@Query("SELECT a FROM Agent a WHERE (LOWER(a.availability) = 'yes' AND a.id NOT IN (SELECT ap.agentId FROM Appointment ap WHERE LOWER(ap.status) <> 'cancelled' AND ap.customerId <> :customerId)) OR a.id IN (SELECT ap2.agentId FROM Appointment ap2 WHERE LOWER(ap2.status) <> 'cancelled' AND ap2.customerId = :customerId)")
+
+//  @Query("SELECT a FROM Agent a WHERE LOWER(a.availability) = 'yes'")
     List<Agent> findAgentsVisibleToCustomer(@Param("customerId") Long customerId);
 }
