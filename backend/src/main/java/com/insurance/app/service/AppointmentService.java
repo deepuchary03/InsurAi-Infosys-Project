@@ -2,6 +2,8 @@ package com.insurance.app.service;
 
 import com.insurance.app.model.Appointment;
 import com.insurance.app.repository.AppointmentRepository;
+import com.insurance.app.repository.AgentRepository;
+import com.insurance.app.model.Agent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,8 @@ import java.util.Optional;
 public class AppointmentService {
     @Autowired
     private AppointmentRepository appointmentRepository;
+    @Autowired
+    private AgentRepository agentRepository;
     
     public List<Appointment> getAllAppointments() {
         return appointmentRepository.findAll();
@@ -31,7 +35,15 @@ public class AppointmentService {
     
     public Appointment createAppointment(Appointment appointment) {
         appointment.setStatus("Scheduled");
-        return appointmentRepository.save(appointment);
+        Appointment saved = appointmentRepository.save(appointment);
+        // mark the agent as unavailable ("no") when a customer books the agent
+        if (saved.getAgentId() != null) {
+            agentRepository.findById(saved.getAgentId()).ifPresent(agent -> {
+                agent.setAvailability("no");
+                agentRepository.save(agent);
+            });
+        }
+        return saved;
     }
     
     public void deleteAppointment(Long id) {

@@ -18,4 +18,6 @@ public class Agent {
     private String name;
     private String specialization;
     private String availability;
+    // Optional schedule for the agent (e.g. "Mon-Fri 09:00-17:00" or JSON) - will not break existing clients
+    private String schedule;
 }

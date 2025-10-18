@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { agentAPI, appointmentAPI, planAPI } from "../services/api";
+import AiAssistant from "../components/AiAssistant";
 
 function CustomerDashboard({ user, onLogout }) {
   const [agents, setAgents] = useState([]);
@@ -126,6 +127,9 @@ function CustomerDashboard({ user, onLogout }) {
             </table>
           </div>
         </div>
+
+        {/* AI Assistant is rendered as a floating widget; not inline in the flow */}
+        <AiAssistant user={user} />
 
         <div className="section">
           <h2>Insurance Plans</h2>

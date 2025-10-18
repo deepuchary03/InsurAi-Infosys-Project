@@ -4,3 +4,8 @@ target/
 .DS_Store
 *.log
 .env
+background.jpg/
+CHANGES_SUMMARY.md
+AI_SETUP.MD
+AI_CAPABILITIES.md
+GEMINI_API_TESTING.md
