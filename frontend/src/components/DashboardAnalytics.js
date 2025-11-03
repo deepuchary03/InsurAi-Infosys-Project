@@ -1,5 +1,5 @@
-import React from 'react';
-import { Pie, Bar } from 'react-chartjs-2';
+import React from "react";
+import { Pie, Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -8,9 +8,9 @@ import {
   BarElement,
   Title,
   Tooltip,
-  Legend
-} from 'chart.js';
-import './DashboardAnalytics.css';
+  Legend,
+} from "chart.js";
+import "./DashboardAnalytics.css";
 
 ChartJS.register(
   ArcElement,
@@ -38,16 +38,16 @@ function DashboardAnalytics({ appointments }) {
       {
         data: Object.values(statusCounts),
         backgroundColor: [
-          'rgba(54, 162, 235, 0.8)',
-          'rgba(75, 192, 192, 0.8)',
-          'rgba(255, 99, 132, 0.8)',
-          'rgba(255, 206, 86, 0.8)',
+          "rgba(54, 162, 235, 0.8)",
+          "rgba(75, 192, 192, 0.8)",
+          "rgba(255, 99, 132, 0.8)",
+          "rgba(255, 206, 86, 0.8)",
         ],
         borderColor: [
-          'rgba(54, 162, 235, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(255, 99, 132, 1)',
-          'rgba(255, 206, 86, 1)',
+          "rgba(54, 162, 235, 1)",
+          "rgba(75, 192, 192, 1)",
+          "rgba(255, 99, 132, 1)",
+          "rgba(255, 206, 86, 1)",
         ],
         borderWidth: 1,
       },
@@ -62,18 +62,28 @@ function DashboardAnalytics({ appointments }) {
   }, {});
 
   const monthNames = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
   ];
 
   const barChartData = {
     labels: monthNames,
     datasets: [
       {
-        label: 'Appointments per Month',
+        label: "Appointments per Month",
         data: monthNames.map((_, index) => monthlyData[index] || 0),
-        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-        borderColor: 'rgba(54, 162, 235, 1)',
+        backgroundColor: "rgba(54, 162, 235, 0.6)",
+        borderColor: "rgba(54, 162, 235, 1)",
         borderWidth: 1,
       },
     ],
@@ -83,11 +93,11 @@ function DashboardAnalytics({ appointments }) {
     responsive: true,
     plugins: {
       legend: {
-        position: 'top',
+        position: "top",
       },
       title: {
         display: true,
-        text: 'Monthly Appointment Distribution',
+        text: "Monthly Appointment Distribution",
       },
     },
     scales: {
@@ -104,11 +114,11 @@ function DashboardAnalytics({ appointments }) {
     responsive: true,
     plugins: {
       legend: {
-        position: 'right',
+        position: "right",
       },
       title: {
         display: true,
-        text: 'Appointment Status Distribution',
+        text: "Appointment Status Distribution",
       },
     },
   };
@@ -137,15 +147,21 @@ function DashboardAnalytics({ appointments }) {
             </div>
             <div className="stat-item">
               <span className="stat-label">Completed</span>
-              <span className="stat-value">{statusCounts['completed'] || 0}</span>
+              <span className="stat-value">
+                {statusCounts["completed"] || 0}
+              </span>
             </div>
             <div className="stat-item">
               <span className="stat-label">Scheduled</span>
-              <span className="stat-value">{statusCounts['scheduled'] || 0}</span>
+              <span className="stat-value">
+                {statusCounts["scheduled"] || 0}
+              </span>
             </div>
             <div className="stat-item">
               <span className="stat-label">Cancelled</span>
-              <span className="stat-value">{statusCounts['Cancelled'] || 0}</span>
+              <span className="stat-value">
+                {statusCounts["Cancelled"] || 0}
+              </span>
             </div>
           </div>
         </div>

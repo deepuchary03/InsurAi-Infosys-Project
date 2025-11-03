@@ -3,7 +3,7 @@
   --heat-level-2-color: rgba(54, 162, 235, 0.4);
   --heat-level-3-color: rgba(54, 162, 235, 0.6);
   --heat-level-4-color: rgba(54, 162, 235, 0.8);
-  --heat-level-5-color: rgba(54, 162, 235, 1.0);
+  --heat-level-5-color: rgba(54, 162, 235, 1);
 }
 
 .heatmap-container {
@@ -63,11 +63,21 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.heat-level-1 { background-color: var(--heat-level-1-color); }
-.heat-level-2 { background-color: var(--heat-level-2-color); }
-.heat-level-3 { background-color: var(--heat-level-3-color); }
-.heat-level-4 { background-color: var(--heat-level-4-color); }
-.heat-level-5 { background-color: var(--heat-level-5-color); }
+.heat-level-1 {
+  background-color: var(--heat-level-1-color);
+}
+.heat-level-2 {
+  background-color: var(--heat-level-2-color);
+}
+.heat-level-3 {
+  background-color: var(--heat-level-3-color);
+}
+.heat-level-4 {
+  background-color: var(--heat-level-4-color);
+}
+.heat-level-5 {
+  background-color: var(--heat-level-5-color);
+}
 
 .fc-day-today {
   background-color: rgba(255, 220, 40, 0.15) !important;

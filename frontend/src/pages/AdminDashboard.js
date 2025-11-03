@@ -39,27 +39,32 @@ function AdminDashboard({ user, onLogout }) {
         ]);
       setUsers(usersRes.data);
       setAgents(agentsRes.data);
-      
+
       // Process appointments to update status based on time
       const processedAppointments = processAppointments(appointmentsRes.data);
       setAppointments(processedAppointments);
-      
+
       // Update any appointments that changed status
       const updatePromises = processedAppointments
-        .filter(appointment => {
-          const originalStatus = appointmentsRes.data.find(a => a.id === appointment.id)?.status;
-          return appointment.status !== originalStatus && originalStatus !== 'cancelled';
+        .filter((appointment) => {
+          const originalStatus = appointmentsRes.data.find(
+            (a) => a.id === appointment.id
+          )?.status;
+          return (
+            appointment.status !== originalStatus &&
+            originalStatus !== "cancelled"
+          );
         })
-        .map(appointment => 
-          appointmentAPI.updateAppointment(appointment.id, { 
+        .map((appointment) =>
+          appointmentAPI.updateAppointment(appointment.id, {
             status: appointment.status,
-            lastUpdated: new Date().toISOString()
+            lastUpdated: new Date().toISOString(),
           })
         );
-      
+
       // Wait for all updates to complete
       await Promise.all(updatePromises);
-      
+
       setPlans(plansRes.data);
       setNotifications(notificationsRes.data);
     } catch (error) {

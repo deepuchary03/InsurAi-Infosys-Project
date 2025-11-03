@@ -30,14 +30,19 @@ function CustomerDashboard({ user, onLogout }) {
 
       // Update any appointments that changed status
       const updatePromises = processedAppointments
-        .filter(appointment => {
-          const originalStatus = appointmentsRes.data.find(a => a.id === appointment.id)?.status;
-          return appointment.status !== originalStatus && originalStatus !== 'cancelled';
+        .filter((appointment) => {
+          const originalStatus = appointmentsRes.data.find(
+            (a) => a.id === appointment.id
+          )?.status;
+          return (
+            appointment.status !== originalStatus &&
+            originalStatus !== "cancelled"
+          );
         })
-        .map(appointment => 
-          appointmentAPI.updateAppointment(appointment.id, { 
+        .map((appointment) =>
+          appointmentAPI.updateAppointment(appointment.id, {
             status: appointment.status,
-            lastUpdated: new Date().toISOString()
+            lastUpdated: new Date().toISOString(),
           })
         );
 
@@ -161,16 +166,17 @@ function CustomerDashboard({ user, onLogout }) {
                       </span>
                     </td>
                     <td>
-                      {appointment.status !== "Cancelled" && appointment.status !== "completed" && (
-                        <button
-                          className="btn btn-danger"
-                          onClick={() =>
-                            handleCancelAppointment(appointment.id)
-                          }
-                        >
-                          Cancel
-                        </button>
-                      )}
+                      {appointment.status !== "Cancelled" &&
+                        appointment.status !== "completed" && (
+                          <button
+                            className="btn btn-danger"
+                            onClick={() =>
+                              handleCancelAppointment(appointment.id)
+                            }
+                          >
+                            Cancel
+                          </button>
+                        )}
                     </td>
                   </tr>
                 ))}

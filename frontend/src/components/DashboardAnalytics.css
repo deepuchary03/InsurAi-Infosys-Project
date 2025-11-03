@@ -28,7 +28,8 @@
   font-size: 1.2rem;
 }
 
-.pie-chart-container, .bar-chart-container {
+.pie-chart-container,
+.bar-chart-container {
   flex: 1;
   display: flex;
   align-items: center;
@@ -89,7 +90,7 @@
   .analytics-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }

@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { userAPI } from '../services/api';
-import './ProfileCard.css';
+import React, { useState, useEffect } from "react";
+import { userAPI } from "../services/api";
+import "./ProfileCard.css";
 
 function ProfileCard({ user, onUpdate, userType }) {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     ...user,
-    password: '' // Empty password field for security
+    password: "", // Empty password field for security
   });
   const [profileData, setProfileData] = useState(null);
 
@@ -17,24 +17,24 @@ function ProfileCard({ user, onUpdate, userType }) {
         // First try to get the complete user data
         const response = await userAPI.getUserById(user.id);
         const userData = response.data;
-        
+
         // Update the profile data state
         setProfileData(userData);
-        
+
         // Update form data with all available user information
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           username: userData.username,
           email: userData.email,
           phone: userData.phone,
           fullName: userData.fullName,
           // Include any additional fields from user data
-          ...userData
+          ...userData,
         }));
-        
-        console.log('Fetched user data:', userData); // For debugging
+
+        console.log("Fetched user data:", userData); // For debugging
       } catch (error) {
-        console.error('Error fetching profile:', error);
+        console.error("Error fetching profile:", error);
       } finally {
         setLoading(false);
       }
@@ -46,7 +46,7 @@ function ProfileCard({ user, onUpdate, userType }) {
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -56,24 +56,24 @@ function ProfileCard({ user, onUpdate, userType }) {
     try {
       // Update the user data
       await userAPI.updateUser(user.id, formData);
-      
+
       // Fetch the updated data
       const response = await userAPI.getUserById(user.id);
       const updatedData = response.data;
-      
+
       // Update local state
       setProfileData(updatedData);
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         ...updatedData,
-        password: '' // Reset password field
+        password: "", // Reset password field
       }));
-      
+
       setIsEditing(false);
-      alert('Profile updated successfully!');
+      alert("Profile updated successfully!");
     } catch (error) {
-      console.error('Error updating profile:', error);
-      alert('Failed to update profile. Please try again.');
+      console.error("Error updating profile:", error);
+      alert("Failed to update profile. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -91,7 +91,9 @@ function ProfileCard({ user, onUpdate, userType }) {
     <div className="profile-card auth-form glass-card">
       <div className="profile-header">
         <div className="profile-avatar">
-          {profileData?.name ? profileData.name[0].toUpperCase() : user.username[0].toUpperCase()}
+          {profileData?.name
+            ? profileData.name[0].toUpperCase()
+            : user.username[0].toUpperCase()}
         </div>
         <h2>{userType} Profile</h2>
       </div>
@@ -116,7 +118,7 @@ function ProfileCard({ user, onUpdate, userType }) {
             <input
               type="email"
               name="email"
-              value={formData.email || ''}
+              value={formData.email || ""}
               onChange={handleChange}
               required
               className="auth-input"
@@ -128,21 +130,21 @@ function ProfileCard({ user, onUpdate, userType }) {
             <input
               type="tel"
               name="phone"
-              value={formData.phone || ''}
+              value={formData.phone || ""}
               onChange={handleChange}
               className="auth-input"
               placeholder="Enter phone number"
             />
           </div>
 
-          {userType === 'Agent' && (
+          {userType === "Agent" && (
             <>
               <div className="form-group">
                 <label>Specialization</label>
                 <input
                   type="text"
                   name="specialization"
-                  value={formData.specialization || ''}
+                  value={formData.specialization || ""}
                   onChange={handleChange}
                   className="auth-input"
                 />
@@ -153,7 +155,7 @@ function ProfileCard({ user, onUpdate, userType }) {
                   type="text"
                   name="workingHours"
                   placeholder="e.g., 9:00 AM - 5:00 PM"
-                  value={formData.workingHours || ''}
+                  value={formData.workingHours || ""}
                   onChange={handleChange}
                   className="auth-input"
                 />
@@ -162,7 +164,7 @@ function ProfileCard({ user, onUpdate, userType }) {
                 <label>Availability</label>
                 <select
                   name="availability"
-                  value={formData.availability || 'yes'}
+                  value={formData.availability || "yes"}
                   onChange={handleChange}
                   className="auth-input"
                 >
@@ -215,36 +217,53 @@ function ProfileCard({ user, onUpdate, userType }) {
                   )}
                 </>
               ) : (
-                'Not set'
+                "Not set"
               )}
             </div>
           </div>
           <div className="detail-group">
             <label>Phone</label>
-            <div className="detail-value">{profileData?.phone || 'Not set'}</div>
+            <div className="detail-value">
+              {profileData?.phone || "Not set"}
+            </div>
           </div>
-          {userType === 'Agent' && (
+          {userType === "Agent" && (
             <>
               <div className="detail-group">
                 <label>Specialization</label>
-                <div className="detail-value">{profileData?.specialization || 'Not set'}</div>
+                <div className="detail-value">
+                  {profileData?.specialization || "Not set"}
+                </div>
               </div>
               <div className="detail-group">
                 <label>Working Hours</label>
-                <div className="detail-value">{profileData?.workingHours || 'Not set'}</div>
+                <div className="detail-value">
+                  {profileData?.workingHours || "Not set"}
+                </div>
               </div>
               <div className="detail-group">
                 <label>Availability</label>
                 <div className="detail-value">
-                  <span className={`availability ${profileData?.availability === 'yes' ? 'available' : 'unavailable'}`}>
-                    {profileData?.availability === 'yes' ? 'Available' : 'Not Available'}
+                  <span
+                    className={`availability ${
+                      profileData?.availability === "yes"
+                        ? "available"
+                        : "unavailable"
+                    }`}
+                  >
+                    {profileData?.availability === "yes"
+                      ? "Available"
+                      : "Not Available"}
                   </span>
                 </div>
               </div>
             </>
           )}
           <div className="form-actions">
-            <button className="btn btn-primary" onClick={() => setIsEditing(true)}>
+            <button
+              className="btn btn-primary"
+              onClick={() => setIsEditing(true)}
+            >
               Edit Profile
             </button>
           </div>

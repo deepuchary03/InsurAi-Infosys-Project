@@ -13,25 +13,34 @@ function AgentDashboard({ user, onLogout }) {
   const fetchData = async () => {
     try {
       const agentsRes = await agentAPI.getAllAgents();
-      const myProfile = agentsRes.data.find((a) => a.name === user.username) || agentsRes.data[0];
+      const myProfile =
+        agentsRes.data.find((a) => a.name === user.username) ||
+        agentsRes.data[0];
 
       if (myProfile) {
-        const appointmentsRes = await appointmentAPI.getAppointmentsByAgent(myProfile.id);
-        
+        const appointmentsRes = await appointmentAPI.getAppointmentsByAgent(
+          myProfile.id
+        );
+
         // Process appointments to update status based on time
         const processedAppointments = processAppointments(appointmentsRes.data);
         setAppointments(processedAppointments);
 
         // Update any appointments that changed status
         const updatePromises = processedAppointments
-          .filter(appointment => {
-            const originalStatus = appointmentsRes.data.find(a => a.id === appointment.id)?.status;
-            return appointment.status !== originalStatus && originalStatus !== 'cancelled';
+          .filter((appointment) => {
+            const originalStatus = appointmentsRes.data.find(
+              (a) => a.id === appointment.id
+            )?.status;
+            return (
+              appointment.status !== originalStatus &&
+              originalStatus !== "cancelled"
+            );
           })
-          .map(appointment => 
-            appointmentAPI.updateAppointment(appointment.id, { 
+          .map((appointment) =>
+            appointmentAPI.updateAppointment(appointment.id, {
               status: appointment.status,
-              lastUpdated: new Date().toISOString()
+              lastUpdated: new Date().toISOString(),
             })
           );
 
@@ -68,8 +77,6 @@ function AgentDashboard({ user, onLogout }) {
       </div>
 
       <div className="dashboard-content glass-container">
-
-
         <div className="section">
           <h2>My Appointments</h2>
           <div className="table-container">

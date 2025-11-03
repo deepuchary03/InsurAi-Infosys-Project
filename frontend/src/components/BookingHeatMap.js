@@ -1,7 +1,7 @@
-import React from 'react';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import './BookingHeatMap.css';
+import React from "react";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import "./BookingHeatMap.css";
 
 function BookingHeatMap({ appointments }) {
   const getIntensityLevel = (count) => {
@@ -15,8 +15,8 @@ function BookingHeatMap({ appointments }) {
   // Process appointments into a heatmap format
   const events = appointments.reduce((acc, appointment) => {
     const date = appointment.appointmentDate;
-    const existingEvent = acc.find(e => e.start === date);
-    
+    const existingEvent = acc.find((e) => e.start === date);
+
     if (existingEvent) {
       existingEvent.extendedProps.bookingCount++;
       const level = getIntensityLevel(existingEvent.extendedProps.bookingCount);
@@ -26,15 +26,15 @@ function BookingHeatMap({ appointments }) {
       acc.push({
         start: date,
         end: date,
-        display: 'background',
-        classNames: ['heat-level-1'],
-        backgroundColor: 'var(--heat-level-1-color)',
-        extendedProps: { 
-          bookingCount: 1
-        }
+        display: "background",
+        classNames: ["heat-level-1"],
+        backgroundColor: "var(--heat-level-1-color)",
+        extendedProps: {
+          bookingCount: 1,
+        },
       });
     }
-    
+
     return acc;
   }, []);
 
@@ -72,9 +72,9 @@ function BookingHeatMap({ appointments }) {
         plugins={[dayGridPlugin]}
         initialView="dayGridMonth"
         headerToolbar={{
-          left: 'prev,next today',
-          center: 'title',
-          right: ''
+          left: "prev,next today",
+          center: "title",
+          right: "",
         }}
         events={events}
         height={550}
@@ -83,7 +83,9 @@ function BookingHeatMap({ appointments }) {
         eventDisplay="background"
         eventContent={(arg) => (
           <div className="heat-event-content">
-            <div className="booking-count">{arg.event.extendedProps.bookingCount}</div>
+            <div className="booking-count">
+              {arg.event.extendedProps.bookingCount}
+            </div>
           </div>
         )}
       />

@@ -31,7 +31,8 @@ export const userAPI = {
   getAllUsers: () => api.get("/users"),
   getUserById: (id) => api.get(`/users/${id}`),
   updateUser: (id, userData) => api.put(`/users/${id}`, userData),
-  updateProfile: (id, profileData) => api.put(`/users/${id}/profile`, profileData),
+  updateProfile: (id, profileData) =>
+    api.put(`/users/${id}/profile`, profileData),
   getProfile: (id) => api.get(`/users/${id}/profile`),
   deleteUser: (id) => api.delete(`/users/${id}`),
   verifyEmail: (token) => api.post("/users/verify-email", { token }),
