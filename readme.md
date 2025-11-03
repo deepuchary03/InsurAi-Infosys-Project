@@ -30,3 +30,12 @@
    
 </div>
 
+## .env structure
+```env
+MYSQL_PASSWORD=
+GEMINI_API_KEY=
+JWT_SECRET=
+MAIL_USERNAME=
+MAIL_PASSWORD=
+
+
