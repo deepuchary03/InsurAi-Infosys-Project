@@ -1,14 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { userAPI, agentAPI, appointmentAPI, planAPI } from "../services/api";
+import {
+  userAPI,
+  agentAPI,
+  appointmentAPI,
+  planAPI,
+  notificationAPI,
+  formatINR,
+} from "../services/api";
+import AppointmentCalendar from "../components/AppointmentCalendar";
+import DashboardAnalytics from "../components/DashboardAnalytics";
+import { processAppointments } from "../utils/appointmentUtils";
 
 function AdminDashboard({ user, onLogout }) {
   const [users, setUsers] = useState([]);
   const [agents, setAgents] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [plans, setPlans] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [activeTab, setActiveTab] = useState("users");
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState("");
+  const [editingItem, setEditingItem] = useState(null);
   const [formData, setFormData] = useState({});
 
   useEffect(() => {
@@ -17,17 +29,39 @@ function AdminDashboard({ user, onLogout }) {
 
   const fetchData = async () => {
     try {
-      const [usersRes, agentsRes, appointmentsRes, plansRes] =
+      const [usersRes, agentsRes, appointmentsRes, plansRes, notificationsRes] =
         await Promise.all([
           userAPI.getAllUsers(),
           agentAPI.getAllAgents(),
           appointmentAPI.getAllAppointments(),
           planAPI.getAllPlans(),
+          notificationAPI.getAllNotifications(),
         ]);
       setUsers(usersRes.data);
       setAgents(agentsRes.data);
-      setAppointments(appointmentsRes.data);
+      
+      // Process appointments to update status based on time
+      const processedAppointments = processAppointments(appointmentsRes.data);
+      setAppointments(processedAppointments);
+      
+      // Update any appointments that changed status
+      const updatePromises = processedAppointments
+        .filter(appointment => {
+          const originalStatus = appointmentsRes.data.find(a => a.id === appointment.id)?.status;
+          return appointment.status !== originalStatus && originalStatus !== 'cancelled';
+        })
+        .map(appointment => 
+          appointmentAPI.updateAppointment(appointment.id, { 
+            status: appointment.status,
+            lastUpdated: new Date().toISOString()
+          })
+        );
+      
+      // Wait for all updates to complete
+      await Promise.all(updatePromises);
+      
       setPlans(plansRes.data);
+      setNotifications(notificationsRes.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -35,23 +69,33 @@ function AdminDashboard({ user, onLogout }) {
 
   const handleAddAgent = async () => {
     try {
-      await agentAPI.createAgent(formData);
+      if (editingItem) {
+        await agentAPI.updateAgent(editingItem.id, formData);
+      } else {
+        await agentAPI.createAgent(formData);
+      }
       setShowModal(false);
       setFormData({});
+      setEditingItem(null);
       fetchData();
     } catch (error) {
-      console.error("Error adding agent:", error);
+      console.error("Error saving agent:", error);
     }
   };
 
   const handleAddPlan = async () => {
     try {
-      await planAPI.createPlan(formData);
+      if (editingItem) {
+        await planAPI.updatePlan(editingItem.id, formData);
+      } else {
+        await planAPI.createPlan(formData);
+      }
       setShowModal(false);
       setFormData({});
+      setEditingItem(null);
       fetchData();
     } catch (error) {
-      console.error("Error adding plan:", error);
+      console.error("Error saving plan:", error);
     }
   };
 
@@ -82,9 +126,14 @@ function AdminDashboard({ user, onLogout }) {
     }
   };
 
-  const openModal = (type) => {
+  const openModal = (type, item = null) => {
     setModalType(type);
-    setFormData({});
+    setEditingItem(item);
+    if (item) {
+      setFormData({ ...item });
+    } else {
+      setFormData({});
+    }
     setShowModal(true);
   };
 
@@ -94,7 +143,7 @@ function AdminDashboard({ user, onLogout }) {
         <h1>Admin Dashboard</h1>
         <div>
           <span style={{ marginRight: "20px", color: "#666" }}>
-            Welcome, {user.username}!
+            Logged in as: {user.username}
           </span>
           <button className="btn btn-danger" onClick={onLogout}>
             Logout
@@ -103,7 +152,7 @@ function AdminDashboard({ user, onLogout }) {
       </div>
 
       <div className="dashboard-content glass-container">
-        <div style={{ marginBottom: "20px", display: "flex", gap: "10px" }}>
+        <div className="dashboard-tabs">
           <button
             className={`btn ${activeTab === "users" ? "" : "btn-secondary"}`}
             onClick={() => setActiveTab("users")}
@@ -130,6 +179,14 @@ function AdminDashboard({ user, onLogout }) {
           >
             Plans ({plans.length})
           </button>
+          <button
+            className={`btn ${
+              activeTab === "notifications" ? "" : "btn-secondary"
+            }`}
+            onClick={() => setActiveTab("notifications")}
+          >
+            Notifications ({notifications.length})
+          </button>
         </div>
 
         {activeTab === "users" && (
@@ -152,12 +209,14 @@ function AdminDashboard({ user, onLogout }) {
                       <td>{u.username}</td>
                       <td>{u.role}</td>
                       <td>
-                        <button
-                          className="btn btn-danger"
-                          onClick={() => handleDeleteUser(u.id)}
-                        >
-                          Delete
-                        </button>
+                        <div className="table-actions">
+                          <button
+                            className="btn btn-danger"
+                            onClick={() => handleDeleteUser(u.id)}
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -196,12 +255,20 @@ function AdminDashboard({ user, onLogout }) {
                       <td>{agent.specialization}</td>
                       <td>{agent.availability}</td>
                       <td>
-                        <button
-                          className="btn btn-danger"
-                          onClick={() => handleDeleteAgent(agent.id)}
-                        >
-                          Delete
-                        </button>
+                        <div className="table-actions">
+                          <button
+                            className="btn btn-secondary"
+                            onClick={() => openModal("agent", agent)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="btn btn-danger"
+                            onClick={() => handleDeleteAgent(agent.id)}
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -214,27 +281,47 @@ function AdminDashboard({ user, onLogout }) {
         {activeTab === "appointments" && (
           <div className="section">
             <h2>Appointments Management</h2>
+            <div className="appointment-analytics">
+              <DashboardAnalytics appointments={appointments} />
+            </div>
+            <div style={{ marginBottom: "20px" }}>
+              <AppointmentCalendar
+                appointments={appointments}
+                agents={agents}
+                users={users}
+              />
+            </div>
             <div className="table-container">
               <table>
                 <thead>
                   <tr>
                     <th>ID</th>
-                    <th>Customer ID</th>
-                    <th>Agent ID</th>
+                    <th>Customer Name</th>
+                    <th>Agent Name</th>
                     <th>Date</th>
                     <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {appointments.map((appointment) => (
-                    <tr key={appointment.id}>
-                      <td>{appointment.id}</td>
-                      <td>{appointment.customerId}</td>
-                      <td>{appointment.agentId}</td>
-                      <td>{appointment.appointmentDate}</td>
-                      <td>{appointment.status}</td>
-                    </tr>
-                  ))}
+                  {appointments.map((appointment) => {
+                    const customer = users.find(
+                      (u) => u.id === appointment.customerId
+                    );
+                    const agent = agents.find(
+                      (a) => a.id === appointment.agentId
+                    );
+                    return (
+                      <tr key={appointment.id}>
+                        <td>{appointment.id}</td>
+                        <td>
+                          {customer ? customer.username : "Unknown Customer"}
+                        </td>
+                        <td>{agent ? agent.name : "Unknown Agent"}</td>
+                        <td>{appointment.appointmentDate}</td>
+                        <td>{appointment.status}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -258,7 +345,7 @@ function AdminDashboard({ user, onLogout }) {
                     <th>ID</th>
                     <th>Plan Name</th>
                     <th>Description</th>
-                    <th>Price</th>
+                    <th>Price (₹)</th>
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -268,14 +355,70 @@ function AdminDashboard({ user, onLogout }) {
                       <td>{plan.id}</td>
                       <td>{plan.planName}</td>
                       <td>{plan.description}</td>
-                      <td>${plan.price}</td>
+                      <td>{formatINR(plan.price)}</td>
                       <td>
-                        <button
-                          className="btn btn-danger"
-                          onClick={() => handleDeletePlan(plan.id)}
+                        <div className="table-actions">
+                          <button
+                            className="btn btn-secondary"
+                            onClick={() => openModal("plan", plan)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="btn btn-danger"
+                            onClick={() => handleDeletePlan(plan.id)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "notifications" && (
+          <div className="section">
+            <h2>Notifications Management</h2>
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Recipient Email</th>
+                    <th>Type</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>Created At</th>
+                    <th>Sent At</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {notifications.map((notification) => (
+                    <tr key={notification.id}>
+                      <td>{notification.id}</td>
+                      <td>{notification.recipientEmail}</td>
+                      <td>{notification.notificationType}</td>
+                      <td>{notification.subject}</td>
+                      <td>
+                        <span
+                          className={`status-badge ${notification.status?.toLowerCase()}`}
                         >
-                          Delete
-                        </button>
+                          {notification.status}
+                        </span>
+                      </td>
+                      <td>
+                        {notification.createdAt
+                          ? new Date(notification.createdAt).toLocaleString()
+                          : "N/A"}
+                      </td>
+                      <td>
+                        {notification.sentAt
+                          ? new Date(notification.sentAt).toLocaleString()
+                          : "Not sent"}
                       </td>
                     </tr>
                   ))}
@@ -289,7 +432,11 @@ function AdminDashboard({ user, onLogout }) {
       {showModal && (
         <div className="modal" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3>{modalType === "agent" ? "Add New Agent" : "Add New Plan"}</h3>
+            <h3>
+              {editingItem
+                ? `Edit ${modalType === "agent" ? "Agent" : "Plan"}`
+                : `Add New ${modalType === "agent" ? "Agent" : "Plan"}`}
+            </h3>
             {modalType === "agent" ? (
               <>
                 <div className="form-group">
@@ -317,17 +464,50 @@ function AdminDashboard({ user, onLogout }) {
                 </div>
                 <div className="form-group">
                   <label>Availability</label>
-                  <input
-                    type="text"
-                    value={formData.availability || ""}
+                  <select
+                    value={formData.availability || "yes"}
                     onChange={(e) =>
                       setFormData({ ...formData, availability: e.target.value })
+                    }
+                  >
+                    <option value="yes">Available</option>
+                    <option value="no">Not Available</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Email</label>
+                  <input
+                    type="email"
+                    value={formData.email || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Phone</label>
+                  <input
+                    type="text"
+                    value={formData.phone || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Working Hours</label>
+                  <input
+                    type="text"
+                    placeholder="e.g., 9:00 AM - 5:00 PM"
+                    value={formData.workingHours || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, workingHours: e.target.value })
                     }
                   />
                 </div>
                 <div className="action-buttons">
                   <button className="btn" onClick={handleAddAgent}>
-                    Add Agent
+                    {editingItem ? "Update Agent" : "Add Agent"}
                   </button>
                   <button
                     className="btn btn-secondary"
@@ -359,9 +539,10 @@ function AdminDashboard({ user, onLogout }) {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Price</label>
+                  <label>Price (₹)</label>
                   <input
                     type="number"
+                    placeholder="Enter price in Indian Rupees"
                     value={formData.price || ""}
                     onChange={(e) =>
                       setFormData({
@@ -373,7 +554,7 @@ function AdminDashboard({ user, onLogout }) {
                 </div>
                 <div className="action-buttons">
                   <button className="btn" onClick={handleAddPlan}>
-                    Add Plan
+                    {editingItem ? "Update Plan" : "Add Plan"}
                   </button>
                   <button
                     className="btn btn-secondary"

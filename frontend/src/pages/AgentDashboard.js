@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { agentAPI, appointmentAPI } from "../services/api";
+import AiAssistant from "../components/AiAssistant";
+import { processAppointments } from "../utils/appointmentUtils";
 
 function AgentDashboard({ user, onLogout }) {
-  const [agentProfile, setAgentProfile] = useState(null);
   const [appointments, setAppointments] = useState([]);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    specialization: "",
-    availability: "",
-  });
 
   useEffect(() => {
     fetchData();
@@ -18,22 +13,30 @@ function AgentDashboard({ user, onLogout }) {
   const fetchData = async () => {
     try {
       const agentsRes = await agentAPI.getAllAgents();
-      const myProfile =
-        agentsRes.data.find((a) => a.name === user.username) ||
-        agentsRes.data[0];
+      const myProfile = agentsRes.data.find((a) => a.name === user.username) || agentsRes.data[0];
 
       if (myProfile) {
-        setAgentProfile(myProfile);
-        setFormData({
-          name: myProfile.name,
-          specialization: myProfile.specialization,
-          availability: myProfile.availability,
-        });
+        const appointmentsRes = await appointmentAPI.getAppointmentsByAgent(myProfile.id);
+        
+        // Process appointments to update status based on time
+        const processedAppointments = processAppointments(appointmentsRes.data);
+        setAppointments(processedAppointments);
 
-        const appointmentsRes = await appointmentAPI.getAppointmentsByAgent(
-          myProfile.id
-        );
-        setAppointments(appointmentsRes.data);
+        // Update any appointments that changed status
+        const updatePromises = processedAppointments
+          .filter(appointment => {
+            const originalStatus = appointmentsRes.data.find(a => a.id === appointment.id)?.status;
+            return appointment.status !== originalStatus && originalStatus !== 'cancelled';
+          })
+          .map(appointment => 
+            appointmentAPI.updateAppointment(appointment.id, { 
+              status: appointment.status,
+              lastUpdated: new Date().toISOString()
+            })
+          );
+
+        // Wait for all updates to complete
+        await Promise.all(updatePromises);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -56,7 +59,7 @@ function AgentDashboard({ user, onLogout }) {
         <h1>Agent Dashboard</h1>
         <div>
           <span style={{ marginRight: "20px", color: "#666" }}>
-            Welcome, {user.username}!
+            Logged in as: {user.username}
           </span>
           <button className="btn btn-danger" onClick={onLogout}>
             Logout
@@ -65,23 +68,7 @@ function AgentDashboard({ user, onLogout }) {
       </div>
 
       <div className="dashboard-content glass-container">
-        {agentProfile && (
-          <div className="section">
-            <h2>My Profile</h2>
-            <div className="card">
-              <h3>{agentProfile.name}</h3>
-              <p>
-                <strong>Specialization:</strong> {agentProfile.specialization}
-              </p>
-              <p>
-                <strong>Availability:</strong> {agentProfile.availability}
-              </p>
-              <button className="btn" onClick={() => setShowEditModal(true)}>
-                Edit Profile
-              </button>
-            </div>
-          </div>
-        )}
+
 
         <div className="section">
           <h2>My Appointments</h2>
@@ -89,73 +76,42 @@ function AgentDashboard({ user, onLogout }) {
             <table>
               <thead>
                 <tr>
-                  <th>Customer ID</th>
+                  <th>Customer Name</th>
                   <th>Date</th>
+                  <th>Time</th>
+                  <th>Reason</th>
                   <th>Status</th>
+                  <th>Notes</th>
                 </tr>
               </thead>
               <tbody>
                 {appointments.map((appointment) => (
                   <tr key={appointment.id}>
-                    <td>{appointment.customerId}</td>
+                    <td>
+                      {appointment.customerName ||
+                        `Customer ${appointment.customerId}`}
+                    </td>
                     <td>{appointment.appointmentDate}</td>
-                    <td>{appointment.status}</td>
+                    <td>{appointment.appointmentTime || "Not specified"}</td>
+                    <td>{appointment.reason || "General consultation"}</td>
+                    <td>
+                      <span
+                        className={`status-badge ${appointment.status?.toLowerCase()}`}
+                      >
+                        {appointment.status}
+                      </span>
+                    </td>
+                    <td>{appointment.notes || "No notes"}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </div>
-      </div>
 
-      {showEditModal && (
-        <div className="modal" onClick={() => setShowEditModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3>Edit Profile</h3>
-            <div className="form-group">
-              <label>Name</label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-              />
-            </div>
-            <div className="form-group">
-              <label>Specialization</label>
-              <input
-                type="text"
-                value={formData.specialization}
-                onChange={(e) =>
-                  setFormData({ ...formData, specialization: e.target.value })
-                }
-              />
-            </div>
-            <div className="form-group">
-              <label>Availability</label>
-              <input
-                type="text"
-                value={formData.availability}
-                onChange={(e) =>
-                  setFormData({ ...formData, availability: e.target.value })
-                }
-              />
-            </div>
-            <div className="action-buttons">
-              <button className="btn" onClick={handleUpdateProfile}>
-                Save Changes
-              </button>
-              <button
-                className="btn btn-secondary"
-                onClick={() => setShowEditModal(false)}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        {/* AI Assistant for agents */}
+        <AiAssistant user={user} />
+      </div>
     </div>
   );
 }

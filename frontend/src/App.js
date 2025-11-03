@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import CustomerDashboard from "./pages/CustomerDashboard";
 import AgentDashboard from "./pages/AgentDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import EmailVerification from "./pages/EmailVerification";
 import GeminiBackground from "./Gemini_Generated.png";
 
 function App() {
@@ -61,6 +62,7 @@ function App() {
               user ? <Navigate to="/" /> : <Login onLogin={handleLogin} />
             }
           />
+          <Route path="/verify-email" element={<EmailVerification />} />
           <Route
             path="/customer"
             element={

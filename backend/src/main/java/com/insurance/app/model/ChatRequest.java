@@ -4,6 +4,7 @@ public class ChatRequest {
     private String apiKey; // OpenAI API key provided by caller
     private String message; // message from user
     private String role; // optional: "user" or "agent" or "system"
+    private Long userId; // user ID for appointment booking
 
     public String getApiKey() {
         return apiKey;
@@ -27,5 +28,13 @@ public class ChatRequest {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }

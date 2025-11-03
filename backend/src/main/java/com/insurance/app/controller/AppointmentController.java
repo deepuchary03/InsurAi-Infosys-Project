@@ -38,8 +38,26 @@ public class AppointmentController {
     }
     
     @PostMapping
-    public Appointment createAppointment(@RequestBody Appointment appointment) {
-        return appointmentService.createAppointment(appointment);
+    public ResponseEntity<Appointment> createAppointment(@RequestBody Appointment appointment) {
+        try {
+            Appointment createdAppointment = appointmentService.createAppointment(appointment);
+            return ResponseEntity.ok(createdAppointment);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity<Appointment> updateAppointment(@PathVariable Long id, @RequestBody Appointment appointment) {
+        try {
+            Appointment updatedAppointment = appointmentService.updateAppointment(id, appointment);
+            if (updatedAppointment != null) {
+                return ResponseEntity.ok(updatedAppointment);
+            }
+            return ResponseEntity.notFound().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
     
     @DeleteMapping("/{id}")

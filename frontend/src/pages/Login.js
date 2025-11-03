@@ -7,6 +7,9 @@ function Login({ onLogin }) {
     username: "",
     password: "",
     role: "CUSTOMER",
+    email: "",
+    fullName: "",
+    phone: "",
   });
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState(false);
@@ -47,6 +50,7 @@ function Login({ onLogin }) {
           password: formData.password,
         });
         const { token, id, username, role } = response.data;
+        console.log("API Response:", response.data);
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify({ id, username, role }));
         onLogin({ id, username, role });
@@ -91,18 +95,50 @@ function Login({ onLogin }) {
               />
             </div>
             {isRegister && (
-              <div className="form-group">
-                <label>Role</label>
-                <select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                >
-                  <option value="CUSTOMER">Customer</option>
-                  <option value="AGENT">Agent</option>
-                  <option value="ADMIN">Admin</option>
-                </select>
-              </div>
+              <>
+                <div className="form-group">
+                  <label>Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Enter your email"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Full Name</label>
+                  <input
+                    type="text"
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    placeholder="Enter your full name"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Phone</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="Enter your phone number"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Role</label>
+                  <select
+                    name="role"
+                    value={formData.role}
+                    onChange={handleChange}
+                  >
+                    <option value="CUSTOMER">Customer</option>
+                    <option value="AGENT">Agent</option>
+                    <option value="ADMIN">Admin</option>
+                  </select>
+                </div>
+              </>
             )}
             <button type="submit" className="btn">
               {isRegister ? "Register" : "Login"}

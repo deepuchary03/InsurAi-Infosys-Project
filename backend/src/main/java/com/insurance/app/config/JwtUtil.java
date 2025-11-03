@@ -31,6 +31,13 @@ public class JwtUtil {
         claims.put("role", role);
         return createToken(claims, username);
     }
+    
+    public String generateToken(String username, String role, Long userId) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", role);
+        claims.put("userId", userId.toString());
+        return createToken(claims, username);
+    }
 
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
@@ -48,6 +55,10 @@ public class JwtUtil {
 
     public String extractRole(String token) {
         return extractClaims(token).get("role", String.class);
+    }
+    
+    public String extractUserId(String token) {
+        return extractClaims(token).get("userId", String.class);
     }
 
     public Date extractExpiration(String token) {

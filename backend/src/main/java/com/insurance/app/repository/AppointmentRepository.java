@@ -12,4 +12,5 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findByAgentId(Long agentId);
     // find appointments for an agent with status not equal to 'cancelled' (treat other statuses as active)
     List<Appointment> findByAgentIdAndStatusNot(Long agentId, String status);
+    List<Appointment> findByAgentIdAndAppointmentDateAndStatusNot(Long agentId, String appointmentDate, String status);
 }

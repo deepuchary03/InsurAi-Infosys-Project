@@ -86,9 +86,10 @@
 /* Input */
 .chat-input {
   display: flex;
+  flex-direction: column;
   padding: 10px;
   border-top: 1px solid #ddd;
-  gap: 6px;
+  gap: 8px;
 }
 .chat-input input {
   flex: 1;
@@ -97,6 +98,10 @@
   border: 1px solid #ccc;
   outline: none;
 }
+.input-buttons {
+  display: flex;
+  gap: 6px;
+}
 .chat-input button {
   background-color: #007bff;
   border: none;
@@ -104,6 +109,34 @@
   padding: 8px 12px;
   border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.chat-input button:hover {
+  background-color: #0056b3;
+}
+.voice-btn {
+  background-color: #28a745 !important;
+  font-size: 16px;
+  min-width: 40px;
+}
+.voice-btn.listening {
+  background-color: #dc3545 !important;
+  animation: pulse 1s infinite;
+}
+.voice-btn:hover {
+  background-color: #218838 !important;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .empty {

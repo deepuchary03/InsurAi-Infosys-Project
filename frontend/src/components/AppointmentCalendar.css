@@ -1,0 +1,154 @@
+.calendar-container {
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.calendar-container .fc {
+  background: transparent;
+  font-family: inherit;
+}
+
+.calendar-container .fc-toolbar-title {
+  font-size: 1.75em;
+  color: #000;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.calendar-container .fc-button {
+  background-color: #1976d2;
+  border-color: #1976d2;
+  text-transform: capitalize;
+}
+
+.calendar-container .fc-button:hover {
+  background-color: #1565c0;
+  border-color: #1565c0;
+}
+
+.calendar-container .fc-button-active {
+  background-color: #0d47a1 !important;
+  border-color: #0d47a1 !important;
+}
+
+.calendar-container .fc-event {
+  border-radius: 4px;
+  padding: 2px;
+  margin: 1px 0;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.calendar-container .fc-event:hover {
+  transform: scale(1.02);
+}
+
+.calendar-container .fc-daygrid-day-frame {
+  padding: 4px;
+}
+
+.calendar-container .fc-day-today {
+  background-color: rgba(25, 118, 210, 0.1) !important;
+}
+
+/* Make month/date numbers black */
+.calendar-container .fc-daygrid-day-number,
+.calendar-container .fc-col-header-cell-cushion {
+  color: #000;
+  font-weight: 500;
+}
+
+/* Darken the day names in the header */
+.calendar-container .fc-col-header-cell {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.calendar-container .fc-col-header-cell-cushion {
+  padding: 8px;
+  color: #000;
+  font-weight: 600;
+}
+
+/* Event Modal Styles */
+.event-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.event-modal-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  overflow: hidden;
+}
+
+.event-modal-header {
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+}
+
+.event-modal-header h3 {
+  margin: 0;
+  font-size: 1.2em;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.event-modal-body {
+  padding: 20px;
+}
+
+.event-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.event-detail:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  color: #666;
+  font-weight: 500;
+}
+
+.detail-value {
+  color: #333;
+  font-weight: 600;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: white;
+  font-size: 0.9em;
+}

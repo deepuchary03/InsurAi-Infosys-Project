@@ -202,6 +202,9 @@ body {
 .table-container {
   overflow-x: auto;
   margin-top: 20px;
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 table {
@@ -210,6 +213,7 @@ table {
   background: white;
   border-radius: 12px;
   overflow: hidden;
+  min-width: 600px; /* Ensure minimum width for readability */
 }
 
 table thead {
@@ -219,8 +223,20 @@ table thead {
 
 table th,
 table td {
-  padding: 15px;
+  padding: 12px 15px;
   text-align: left;
+  vertical-align: middle;
+}
+
+table th {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+table td {
+  font-size: 14px;
 }
 
 table tbody tr {
@@ -230,6 +246,20 @@ table tbody tr {
 
 table tbody tr:hover {
   background: #f5f7fa;
+}
+
+/* Table action buttons */
+.table-actions {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.table-actions .btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  min-width: auto;
+  white-space: nowrap;
 }
 
 .modal {
@@ -284,8 +314,124 @@ table tbody tr:hover {
   text-align: center;
 }
 
+/* Status badges for appointments and notifications */
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.scheduled {
+  background-color: #e3f2fd;
+  color: #e35d58;
+}
+
+.status-badge.completed {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+}
+
+.status-badge.cancelled {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.status-badge.pending {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+.status-badge.sent {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+}
+
+.status-badge.failed {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+/* Selected agent info in booking modal */
+.selected-agent-info {
+  background: rgba(102, 126, 234, 0.1);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border-left: 4px solid #667eea;
+}
+
+.selected-agent-info h4 {
+  margin: 0 0 10px 0;
+  color: #667eea;
+}
+
+.selected-agent-info p {
+  margin: 5px 0;
+  color: #555;
+}
+
+/* Email Verification Styles */
+.verification-content {
+  text-align: center;
+  padding: 20px;
+}
+
+.verification-loading,
+.verification-success,
+.verification-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.success-icon,
+.error-icon {
+  font-size: 48px;
+  margin: 10px 0;
+}
+
+.verification-success h2 {
+  color: #28a745;
+  margin: 10px 0;
+}
+
+.verification-error h2 {
+  color: #dc3545;
+  margin: 10px 0;
+}
+
+.redirect-info {
+  font-size: 14px;
+  color: #666;
+  font-style: italic;
+}
+
 .section {
   margin-bottom: 30px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .section h2 {
@@ -373,11 +519,59 @@ table tbody tr:hover {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   padding: 30px;
   margin-bottom: 20px;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Enhanced Login Box with Glass Effect */
 .login-box {
   background: rgba(255, 255, 255, 0.2) !important;
+
+  /* Admin Dashboard Tab Buttons */
+  .dashboard-tabs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+    justify-content: center;
+  }
+
+  .dashboard-tabs .btn {
+    flex: 0 1 auto;
+    min-width: 120px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .section {
+      max-width: 100%;
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+
+    .dashboard-content {
+      max-width: 100%;
+      margin-left: 10px;
+      margin-right: 10px;
+      padding: 15px;
+    }
+
+    .dashboard-tabs {
+      justify-content: flex-start;
+    }
+
+    .dashboard-tabs .btn {
+      min-width: auto;
+      flex: 1 1 auto;
+    }
+
+    table {
+      min-width: 500px;
+    }
+  }
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -450,4 +644,43 @@ table tbody tr:hover {
   .dashboard-content {
     padding: 20px;
   }
+}
+/* Admin Dashboard Tab Buttons */
+.dashboard-tabs {
+  display: flex;
+  justify-content: center; /* center them horizontally */
+  align-items: center;
+  gap: 10px; /* space between buttons */
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dashboard-tabs .btn {
+  width: auto !important; /* override global full-width button */
+  flex: 0 0 auto;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  background: #6777e1;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.dashboard-tabs .btn:hover {
+  background: #705bb9;
+  transform: translateY(-1px);
+}
+
+.dashboard-tabs .btn:not(.btn-secondary) {
+  background: #7450a9;
+  border-color: rgba(102, 126, 234, 0.4);
 }
