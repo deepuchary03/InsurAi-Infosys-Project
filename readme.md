@@ -17,9 +17,16 @@
 # https://insurai-pranav-c.vercel.app/login
 
 <div style="display:flex;gap:10px;">
-  <h2>milestone 1 </h2>
+  <h2>Architecture & Class diagram</h2>
+  <img src="./architecture.png"  height="400px" width="500px" >
+  <img src="./image.png"  height="400px" width="500px" >
+  <h2>Output</h2>
   <img src="./a.png" height="400px" width="500px">
     <img src="./b.png" height="400px" width="500px">
     <img src="./c.png" height="400px" width="500px">
       <img src="./d.png" height="400px" width="500px">
+   
+  <img src="./a.png" height="400px" width="500px">
+   
 </div>
+
