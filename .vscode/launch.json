@@ -9,6 +9,16 @@
       "projectName": "online-insurance-system",
       "args": "",
       "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-InsuranceSystemApplication<corporate-insurance>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.insurance.InsuranceSystemApplication",
+      "projectName": "corporate-insurance",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
     }
   ]
 }
