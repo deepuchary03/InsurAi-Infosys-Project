@@ -50,6 +50,7 @@ export const agentAPI = {
       `/agents/available${customerId ? "?customerId=" + customerId : ""}`
     ),
   getAgentById: (id) => api.get(`/agents/${id}`),
+  getAgentByUserId: (userId) => api.get(`/agents/user/${userId}`),
   createAgent: (agentData) => api.post("/agents", agentData),
   updateAgent: (id, agentData) => api.put(`/agents/${id}`, agentData),
   deleteAgent: (id) => api.delete(`/agents/${id}`),

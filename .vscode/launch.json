@@ -2,11 +2,11 @@
   "configurations": [
     {
       "type": "java",
-      "name": "Spring Boot-CorporateInsuranceApplication<corporate-insurance>",
+      "name": "Spring Boot-InsuranceSystemApplication<online-insurance-system>",
       "request": "launch",
       "cwd": "${workspaceFolder}",
-      "mainClass": "com.insurance.app.CorporateInsuranceApplication",
-      "projectName": "corporate-insurance",
+      "mainClass": "com.insurance.InsuranceSystemApplication",
+      "projectName": "online-insurance-system",
       "args": "",
       "envFile": "${workspaceFolder}/.env"
     }

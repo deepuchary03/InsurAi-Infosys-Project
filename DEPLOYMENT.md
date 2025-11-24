@@ -1,174 +1,572 @@
-# Insurance Application - Docker & Render Deployment Guide
+# 🚀 Deployment Guide
 
-This guide covers deploying the Insurance Application using Docker locally and on Render.
+## Table of Contents
 
-## 🐳 Local Docker Development
+1. [Backend Deployment](#backend-deployment)
+2. [Frontend Deployment](#frontend-deployment)
+3. [Database Setup](#database-setup)
+4. [Environment Configuration](#environment-configuration)
+5. [Production Checklist](#production-checklist)
 
-### Prerequisites
-- Docker and Docker Compose installed
-- MySQL (optional, will be provided by Docker)
+---
 
-### Quick Start
+## Backend Deployment
+
+### Option 1: Deploy to Heroku
+
+#### Prerequisites
+
+- Heroku CLI installed
+- Heroku account
+
+#### Steps
+
+1. **Create Procfile in backend root:**
+
+```
+web: java -jar target/online-insurance-system-1.0.0.jar
+```
+
+2. **Create system.properties:**
+
+```
+java.runtime.version=17
+```
+
+3. **Deploy commands:**
+
 ```bash
-# Clone the repository
-git clone <your-repo-url>
-cd insur-ai-updated-2
+# Login to Heroku
+heroku login
 
-# Start all services
+# Create app
+heroku create your-app-name
+
+# Add MySQL addon
+heroku addons:create jawsdb:kitefin
+
+# Set environment variables
+heroku config:set JWT_SECRET=your-secret-key
+heroku config:set GEMINI_API_KEY=your-gemini-key
+heroku config:set EMAIL_USERNAME=your-email
+heroku config:set EMAIL_PASSWORD=your-email-password
+
+# Deploy
+git push heroku main
+
+# Open app
+heroku open
+```
+
+### Option 2: Deploy to AWS Elastic Beanstalk
+
+1. **Package application:**
+
+```bash
+mvn clean package
+```
+
+2. **Install AWS CLI and EB CLI**
+
+3. **Initialize Elastic Beanstalk:**
+
+```bash
+eb init -p java-17 insurance-system
+```
+
+4. **Create environment:**
+
+```bash
+eb create insurance-prod-env
+```
+
+5. **Set environment variables in EB Console**
+
+6. **Deploy:**
+
+```bash
+eb deploy
+```
+
+### Option 3: Docker Deployment
+
+#### Create Dockerfile in backend root:
+
+```dockerfile
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY target/online-insurance-system-1.0.0.jar app.jar
+EXPOSE 8081
+ENTRYPOINT ["java", "-jar", "app.jar"]
+```
+
+#### Create docker-compose.yml:
+
+```yaml
+version: "3.8"
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: insurance_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  backend:
+    build: ./backend
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/insurance_db
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpassword
+      - JWT_SECRET=your-secret-key
+      - GEMINI_API_KEY=your-gemini-key
+    depends_on:
+      - mysql
+
+volumes:
+  mysql-data:
+```
+
+#### Deploy:
+
+```bash
 docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
 ```
 
-### Services
-- **Frontend**: http://localhost (React app with Nginx)
-- **Backend**: http://localhost:8081 (Spring Boot API)
-- **Database**: MySQL on port 3306
+---
 
-### Individual Service Commands
+## Frontend Deployment
+
+### Option 1: Deploy to Vercel (Recommended)
+
+1. **Install Vercel CLI:**
+
 ```bash
-# Build and run backend only
-cd backend
-docker build -t insurance-backend .
-docker run -p 8081:8081 insurance-backend
+npm install -g vercel
+```
 
-# Build and run frontend only
+2. **Build project:**
+
+```bash
 cd frontend
-docker build -t insurance-frontend .
-docker run -p 80:80 insurance-frontend
+npm run build
 ```
 
-## ☁️ Render Deployment
+3. **Deploy:**
 
-### Backend Deployment on Render
-
-1. **Create a new Web Service** on Render dashboard
-2. **Connect your GitHub repository**
-3. **Configure the service**:
-   - **Name**: `insurance-backend`
-   - **Environment**: `Docker`
-   - **Build Command**: `cd backend && mvn clean package -DskipTests`
-   - **Start Command**: `java -Dspring.profiles.active=prod -jar backend/target/*.jar`
-   - **Port**: `8081`
-
-4. **Set Environment Variables**:
-   ```
-   SPRING_PROFILES_ACTIVE=prod
-   DATABASE_URL=jdbc:mysql://your-mysql-host:3306/insurancedb?allowPublicKeyRetrieval=true&useSSL=true&serverTimezone=UTC
-   DB_USERNAME=your_db_user
-   DB_PASSWORD=your_db_password
-   ADMIN_USERNAME=admin
-   ADMIN_PASSWORD=your_secure_password
-   ```
-
-5. **Database Setup**:
-   - Use Render's PostgreSQL addon OR
-   - External MySQL service (PlanetScale, Railway, etc.)
-
-### Frontend Deployment on Render
-
-1. **Create a new Static Site** on Render dashboard
-2. **Connect the same GitHub repository**
-3. **Configure the service**:
-   - **Name**: `insurance-frontend`
-   - **Build Command**: `cd frontend && npm install && npm run build`
-   - **Publish Directory**: `frontend/build`
-
-4. **Set Environment Variables**:
-   ```
-   REACT_APP_API_URL=https://your-backend-url.onrender.com
-   ```
-
-### Database Options for Production
-
-#### Option 1: PlanetScale (Recommended)
 ```bash
-# Sign up at planetscale.com
-# Create database
-# Get connection string
-# Update DATABASE_URL environment variable
+vercel
 ```
 
-#### Option 2: Render PostgreSQL
+4. **Configure environment variables in Vercel dashboard:**
+
+- `VITE_API_URL` = Your backend URL
+
+5. **Set up automatic deployments from GitHub**
+
+### Option 2: Deploy to Netlify
+
+1. **Build project:**
+
 ```bash
-# Add PostgreSQL addon in Render dashboard
-# Update application-prod.properties to use PostgreSQL
-# Update dependencies in pom.xml
+cd frontend
+npm run build
 ```
 
-## 🔧 Configuration Files Explained
+2. **Deploy using Netlify CLI:**
 
-### Backend Dockerfile
-- Multi-stage build for optimization
-- Uses Maven for dependency management
-- Health checks for monitoring
+```bash
+npm install -g netlify-cli
+netlify deploy --prod --dir=dist
+```
 
-### Frontend Dockerfile
-- Node.js build stage
-- Nginx production server
-- Optimized for static file serving
+3. **Or connect GitHub repo in Netlify dashboard**
 
-### docker-compose.yml
-- Complete local development environment
-- MySQL database with initialization
-- Network configuration for service communication
+4. **Configure environment variables:**
 
-## 🚀 Deployment Checklist
+- `VITE_API_URL` = Your backend URL
 
-### Before Deployment
-- [ ] Update CORS origins in backend
-- [ ] Set secure passwords for production
-- [ ] Configure SSL certificates
-- [ ] Set up database backups
-- [ ] Configure monitoring and logging
+### Option 3: Deploy to AWS S3 + CloudFront
 
-### Environment Variables
-- [ ] DATABASE_URL
-- [ ] DB_USERNAME
-- [ ] DB_PASSWORD
-- [ ] ADMIN_USERNAME
-- [ ] ADMIN_PASSWORD
-- [ ] REACT_APP_API_URL
+1. **Build project:**
 
-## 📝 Troubleshooting
+```bash
+npm run build
+```
 
-### Common Issues
+2. **Create S3 bucket and enable static website hosting**
 
-1. **Backend won't start**
-   - Check database connection
-   - Verify environment variables
-   - Check logs: `docker-compose logs backend`
+3. **Upload dist folder:**
 
-2. **Frontend can't connect to backend**
-   - Verify REACT_APP_API_URL
-   - Check CORS configuration
-   - Ensure backend is accessible
+```bash
+aws s3 sync dist/ s3://your-bucket-name --delete
+```
 
-3. **Database connection issues**
-   - Verify database URL format
-   - Check credentials
-   - Ensure database exists
+4. **Create CloudFront distribution**
 
-### Health Check Endpoints
-- Backend health: `http://your-backend-url/actuator/health`
-- Frontend: Any route should return the React app
+5. **Update API URL in environment**
 
-## 🔒 Security Considerations
+### Option 4: Deploy to Firebase Hosting
 
-1. **Change default passwords**
-2. **Use environment variables for secrets**
-3. **Enable HTTPS in production**
-4. **Configure proper CORS origins**
-5. **Set up database SSL/TLS**
-6. **Implement proper error handling**
+1. **Install Firebase CLI:**
 
-## 📊 Monitoring
+```bash
+npm install -g firebase-tools
+```
 
-- Use Render's built-in monitoring
-- Set up log aggregation
-- Configure health check alerts
-- Monitor database performance
+2. **Initialize Firebase:**
+
+```bash
+firebase init hosting
+```
+
+3. **Build and deploy:**
+
+```bash
+npm run build
+firebase deploy
+```
+
+---
+
+## Database Setup
+
+### Production MySQL Setup
+
+#### Option 1: AWS RDS
+
+1. Create RDS MySQL instance
+2. Configure security groups
+3. Note connection details
+4. Update backend application.properties
+
+#### Option 2: DigitalOcean Managed Database
+
+1. Create MySQL database cluster
+2. Configure firewall rules
+3. Get connection string
+4. Update backend configuration
+
+#### Option 3: PlanetScale (Serverless MySQL)
+
+1. Create database
+2. Create production branch
+3. Get connection string
+4. Update backend configuration
+
+---
+
+## Environment Configuration
+
+### Backend Environment Variables
+
+**Required:**
+
+```
+DATABASE_URL=jdbc:mysql://host:port/database
+DATABASE_USERNAME=username
+DATABASE_PASSWORD=password
+JWT_SECRET=your-256-bit-secret-key
+GEMINI_API_KEY=your-gemini-api-key
+```
+
+**Optional:**
+
+```
+EMAIL_USERNAME=your-email@gmail.com
+EMAIL_PASSWORD=your-app-password
+CORS_ALLOWED_ORIGINS=https://your-frontend.com
+SERVER_PORT=8081
+```
+
+### Frontend Environment Variables
+
+```
+VITE_API_URL=https://your-backend-api.com/api/v1
+```
+
+---
+
+## Production Checklist
+
+### Security
+
+- [ ] Change JWT secret to strong random string
+- [ ] Enable HTTPS for both frontend and backend
+- [ ] Configure proper CORS origins
+- [ ] Use environment variables for all secrets
+- [ ] Enable SQL injection protection
+- [ ] Implement rate limiting
+- [ ] Add API request validation
+- [ ] Configure secure headers
+
+### Database
+
+- [ ] Set up automated backups
+- [ ] Configure connection pooling
+- [ ] Optimize indexes
+- [ ] Set up monitoring
+- [ ] Use read replicas for scaling
+- [ ] Configure SSL connections
+
+### Backend
+
+- [ ] Enable production logging
+- [ ] Configure error tracking (Sentry)
+- [ ] Set up health check endpoints
+- [ ] Enable metrics collection
+- [ ] Configure auto-scaling
+- [ ] Add request logging
+- [ ] Implement caching (Redis)
+- [ ] Set up CDN for static assets
+
+### Frontend
+
+- [ ] Minify and bundle assets
+- [ ] Enable gzip compression
+- [ ] Configure CDN
+- [ ] Add error boundary components
+- [ ] Implement analytics
+- [ ] Add loading states
+- [ ] Optimize images
+- [ ] Enable service worker for PWA
+
+### Monitoring
+
+- [ ] Set up application monitoring
+- [ ] Configure uptime monitoring
+- [ ] Set up error alerting
+- [ ] Monitor API response times
+- [ ] Track database performance
+- [ ] Monitor server resources
+
+### Testing
+
+- [ ] Run all unit tests
+- [ ] Perform integration testing
+- [ ] Conduct security audit
+- [ ] Load testing
+- [ ] User acceptance testing
+- [ ] Cross-browser testing
+
+---
+
+## CI/CD Pipeline
+
+### GitHub Actions Example
+
+Create `.github/workflows/deploy.yml`:
+
+```yaml
+name: Deploy Application
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: "17"
+
+      - name: Build with Maven
+        run: mvn clean package -DskipTests
+
+      - name: Deploy to Heroku
+        uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: "your-app-name"
+          heroku_email: "your-email@example.com"
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_API_URL: ${{secrets.API_URL}}
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{secrets.VERCEL_TOKEN}}
+          vercel-org-id: ${{secrets.ORG_ID}}
+          vercel-project-id: ${{secrets.PROJECT_ID}}
+```
+
+---
+
+## Post-Deployment
+
+### 1. Verify Deployment
+
+```bash
+# Check backend health
+curl https://your-api.com/api/v1/health
+
+# Test authentication
+curl -X POST https://your-api.com/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"password"}'
+```
+
+### 2. Monitor Logs
+
+```bash
+# Heroku
+heroku logs --tail
+
+# AWS
+aws logs tail /aws/elasticbeanstalk/your-app
+
+# Docker
+docker logs -f container-name
+```
+
+### 3. Set Up Alerts
+
+- Configure email/SMS alerts for errors
+- Set up uptime monitoring
+- Configure performance alerts
+
+---
+
+## Backup Strategy
+
+### Database Backups
+
+**Automated daily backups:**
+
+```bash
+# MySQL dump script
+mysqldump -u username -p database_name > backup_$(date +%Y%m%d).sql
+```
+
+**Backup to S3:**
+
+```bash
+aws s3 cp backup.sql s3://your-bucket/backups/
+```
+
+### Application Backups
+
+- Version control (Git)
+- Tagged releases
+- Docker images
+- Configuration backups
+
+---
+
+## Rollback Procedure
+
+### Backend Rollback
+
+```bash
+# Heroku
+heroku rollback
+
+# Docker
+docker-compose down
+docker-compose up -d --build previous-version
+
+# AWS EB
+eb deploy --version previous-version
+```
+
+### Frontend Rollback
+
+```bash
+# Vercel
+vercel rollback
+
+# Netlify
+netlify rollback
+```
+
+---
+
+## Performance Optimization
+
+### Backend
+
+1. Enable database connection pooling
+2. Implement Redis caching
+3. Use async processing for emails
+4. Optimize database queries
+5. Enable gzip compression
+
+### Frontend
+
+1. Code splitting
+2. Lazy loading components
+3. Image optimization
+4. CDN for static assets
+5. Service worker caching
+
+---
+
+## Cost Estimation
+
+### Free Tier Options
+
+**Backend:**
+
+- Heroku Free Tier (limited hours)
+- AWS Free Tier (12 months)
+
+**Frontend:**
+
+- Vercel Free Tier
+- Netlify Free Tier
+
+**Database:**
+
+- PlanetScale Free Tier (5GB)
+- AWS RDS Free Tier (12 months)
+
+### Production Costs (Estimated Monthly)
+
+- Backend: $10-50
+- Frontend: $0-20
+- Database: $15-100
+- Email Service: $0-10
+- Monitoring: $0-20
+
+**Total: $25-200/month** depending on traffic
+
+---
+
+## Support & Maintenance
+
+- Regular security updates
+- Dependency updates
+- Database maintenance
+- Log cleanup
+- Performance monitoring
+- User feedback implementation
+
+---
+
+**Your application is now ready for production! 🚀**

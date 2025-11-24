@@ -1,15 +1,42 @@
+# Dependencies
 node_modules/
+
+# Build directories
 build/
 target/
-.DS_Store
-*.log
+dist/
+
+# Environment variables (NEVER COMMIT!)
 .env
+.env.local
+.env.*.local
+set-env.sh
+set-env.ps1
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Temporary files
 background.jpg/
 CHANGES_SUMMARY.md
 AI_SETUP.MD
 AI_CAPABILITIES.md
 GEMINI_API_TESTING.md
-.env
 EXAMPLE_QUERIES.md
 EMAIL_SETUP.md
-EXAMPLE_QUERIES.md
+
+# Application properties with secrets (use .env instead)
+application-local.properties
+application-dev.properties

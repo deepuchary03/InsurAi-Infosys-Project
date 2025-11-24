@@ -1,5 +1,5 @@
-# ====== Build Stage ======
-FROM maven:3.9.6-eclipse-temurin-17 AS build
+# Use Maven with JDK 17 for building
+FROM maven:3.9.5-eclipse-temurin-17 AS build
 
 # Set working directory
 WORKDIR /app
@@ -8,26 +8,26 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-# Copy source code and build
+# Copy source code
 COPY src ./src
+
+# Build the application (skip tests for faster builds)
 RUN mvn clean package -DskipTests
 
-# ====== Runtime Stage ======
-FROM eclipse-temurin:17-jdk-jammy
+# Use JDK 17 runtime for running the application
+FROM eclipse-temurin:17-jre-alpine
 
+# Set working directory
 WORKDIR /app
 
 # Copy the built jar from build stage
 COPY --from=build /app/target/*.jar app.jar
 
-# Expose port
+# Expose the application port
 EXPOSE 8081
 
-# Health check (ensure curl is installed)
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
-
-HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:8081/actuator/health || exit 1
+# Set environment variables (these will be overridden by Render)
+ENV JAVA_OPTS="-Xmx512m -Xms256m"
 
 # Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
