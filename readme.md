@@ -19,8 +19,17 @@ A comprehensive AI-powered online insurance management system built with **React
 ## Deployed Url: https://deepuchary-insurai.vercel.app/
 ---
 # Screenshots
-<img >
-
+<div style="display:flex">
+<img src="./a.png" height="400px" width="500px">
+<img src="./b.png"   height="400px" width="500px">
+<img src="./c.png"  height="400px" width="500px">
+<img src="./d.png" height="400px" width="500px">
+<img src="./e.png" height="400px" width="500px">
+<img src="./f.png" height="400px" width="500px">
+<img src="./g.png" height="400px" width="500px">
+  <img src="./architecture2.png" height="400px" width="500px">
+ 
+</div>
 
 ---
 
