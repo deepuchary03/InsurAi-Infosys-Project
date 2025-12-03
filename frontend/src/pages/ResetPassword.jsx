@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Check, X } from "lucide-react";
+import { Check, X, Lock } from "lucide-react";
 import { authService } from "../services/api";
 import Aurora from "../components/Aurora";
 
@@ -12,6 +12,7 @@ const ResetPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
   const token = searchParams.get("token");
 
   useEffect(() => {

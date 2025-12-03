@@ -18,6 +18,7 @@ import {
   adminService,
   appointmentService,
   agentService,
+  policyService,
 } from "../services/api";
 import {
   Users,
@@ -33,6 +34,8 @@ import {
   X,
   Clock,
   Mail,
+  Download,
+  FileText,
 } from "lucide-react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -44,8 +47,9 @@ const AdminDashboard = () => {
   const [appointments, setAppointments] = useState([]);
   const [users, setUsers] = useState([]);
   const [agents, setAgents] = useState([]);
+  const [policies, setPolicies] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("overview"); // overview, users, agents, appointments, calendar, notifications
+  const [activeTab, setActiveTab] = useState("overview"); // overview, users, agents, appointments, calendar, notifications, policies
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showEventModal, setShowEventModal] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -88,17 +92,19 @@ const AdminDashboard = () => {
 
   const fetchData = async () => {
     try {
-      const [analyticsRes, appointmentsRes, usersRes, agentsRes] =
+      const [analyticsRes, appointmentsRes, usersRes, agentsRes, policiesRes] =
         await Promise.all([
           adminService.getAnalytics(),
           appointmentService.getAllAppointments(),
           adminService.getAllUsers(),
           agentService.getAllAgents(),
+          policyService.getAllPolicies(),
         ]);
       setAnalytics(analyticsRes.data);
       setAppointments(appointmentsRes.data);
       setUsers(usersRes.data);
       setAgents(agentsRes.data);
+      setPolicies(policiesRes.data);
 
       // Generate notifications from system activities
       generateNotifications(
@@ -110,6 +116,58 @@ const AdminDashboard = () => {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || "http://localhost:8081/api/v1"}/admin/analytics/export/csv`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error("Export failed");
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `analytics-report-${new Date().toISOString().split("T")[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success("Analytics exported successfully!");
+    } catch (error) {
+      console.error("Error exporting CSV:", error);
+      toast.error("Failed to export analytics");
+    }
+  };
+
+  const handleExportJSON = async () => {
+    try {
+      const response = await adminService.exportAnalyticsJSON();
+      const dataStr = JSON.stringify(response.data, null, 2);
+      const blob = new Blob([dataStr], { type: "application/json" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `analytics-report-${new Date().toISOString().split("T")[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success("Analytics exported successfully!");
+    } catch (error) {
+      console.error("Error exporting JSON:", error);
+      toast.error("Failed to export analytics");
     }
   };
 
@@ -360,6 +418,16 @@ const AdminDashboard = () => {
           >
             🔔 Notifications ({notifications.filter((n) => !n.read).length})
           </button>
+          <button
+            onClick={() => setActiveTab("policies")}
+            className={`flex-1 px-4 py-2 rounded-md font-medium transition-colors ${
+              activeTab === "policies"
+                ? "bg-white text-primary-600 shadow"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            🛡️ Policies ({policies.length})
+          </button>
         </div>
 
         {/* Stats Grid */}
@@ -382,6 +450,34 @@ const AdminDashboard = () => {
             </div>
           ))}
         </div>
+
+        {/* Export Analytics Section */}
+        {activeTab === "overview" && (
+          <div className="card">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Export Analytics</h2>
+                <p className="text-gray-600 text-sm mt-1">Download analytics reports in your preferred format</p>
+              </div>
+              <div className="flex space-x-3">
+                <button
+                  onClick={handleExportCSV}
+                  className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  <Download size={18} />
+                  <span>Export CSV</span>
+                </button>
+                <button
+                  onClick={handleExportJSON}
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <FileText size={18} />
+                  <span>Export JSON</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Overview Tab */}
         {activeTab === "overview" && (
@@ -1113,6 +1209,123 @@ const AdminDashboard = () => {
                 </p>
                 <p className="text-sm text-gray-600 mt-1">Unread</p>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Policies Tab */}
+        {activeTab === "policies" && (
+          <div className="card">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Insurance Policies</h2>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Policy Number
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Policy Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Type
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Customer
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Agent
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Premium
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Coverage
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {policies.map((policy) => (
+                    <tr key={policy.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {policy.policyNumber}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {policy.policyName}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                          {policy.type}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {policy.customerName}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {policy.agentName || "N/A"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${policy.monthlyPremium}/mo
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${policy.coverageAmount?.toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            policy.status === "ACTIVE"
+                              ? "bg-green-100 text-green-800"
+                              : policy.status === "PENDING"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : policy.status === "EXPIRED"
+                              ? "bg-gray-100 text-gray-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {policy.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button
+                          onClick={async () => {
+                            if (window.confirm("Are you sure you want to delete this policy?")) {
+                              try {
+                                await policyService.deletePolicy(policy.id);
+                                toast.success("Policy deleted successfully");
+                                fetchData();
+                              } catch (error) {
+                                toast.error("Failed to delete policy");
+                              }
+                            }
+                          }}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {policies.length === 0 && (
+                <div className="text-center py-12">
+                  <Shield size={48} className="mx-auto text-gray-400 mb-4" />
+                  <p className="text-gray-500 text-lg">No policies found</p>
+                  <p className="text-gray-400 text-sm mt-2">
+                    Policies will appear here once customers purchase them
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}

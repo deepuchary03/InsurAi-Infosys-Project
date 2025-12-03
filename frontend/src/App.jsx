@@ -22,6 +22,8 @@ import Appointments from "./pages/Appointments";
 import BookAppointment from "./pages/BookAppointment";
 import Agents from "./pages/Agents";
 import AIAssistant from "./pages/AIAssistant";
+import Policies from "./pages/Policies";
+import BrowsePolicies from "./pages/BrowsePolicies";
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requireAdmin, requireAgent }) => {
@@ -123,6 +125,24 @@ function App() {
           element={
             <ProtectedRoute>
               <AIAssistant />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/policies"
+          element={
+            <ProtectedRoute>
+              <Policies />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/browse-policies"
+          element={
+            <ProtectedRoute>
+              <BrowsePolicies />
             </ProtectedRoute>
           }
         />

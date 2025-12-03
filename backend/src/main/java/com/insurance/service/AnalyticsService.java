@@ -200,4 +200,77 @@ public class AnalyticsService {
                 .createdAt(appointment.getCreatedAt())
                 .build();
     }
+    
+    public String exportAnalyticsAsCSV() {
+        AnalyticsDTO analytics = getAdminAnalytics();
+        StringBuilder csv = new StringBuilder();
+        
+        // Header
+        csv.append("Analytics Report\n");
+        csv.append("Generated at: ").append(LocalDateTime.now()).append("\n\n");
+        
+        // Summary Statistics
+        csv.append("Category,Count\n");
+        csv.append("Total Appointments,").append(analytics.getTotalAppointments()).append("\n");
+        csv.append("Total Users,").append(analytics.getTotalUsers()).append("\n");
+        csv.append("Total Agents,").append(analytics.getTotalAgents()).append("\n");
+        csv.append("Total Policies,").append(analytics.getTotalPolicies()).append("\n");
+        csv.append("Total AI Queries,").append(analytics.getTotalAIQueries()).append("\n\n");
+        
+        // Appointments by Status
+        csv.append("Status,Count\n");
+        csv.append("Pending,").append(analytics.getPendingAppointments()).append("\n");
+        csv.append("Confirmed,").append(analytics.getConfirmedAppointments()).append("\n");
+        csv.append("Completed,").append(analytics.getCompletedAppointments()).append("\n");
+        csv.append("Cancelled,").append(analytics.getCancelledAppointments()).append("\n\n");
+        
+        // Appointments by Type
+        csv.append("Type,Count\n");
+        analytics.getAppointmentsByType().forEach((type, count) -> {
+            csv.append(type).append(",").append(count).append("\n");
+        });
+        csv.append("\n");
+        
+        // Recent Appointments
+        csv.append("Recent Appointments\n");
+        csv.append("ID,Customer,Agent,Date,Status,Type\n");
+        analytics.getRecentAppointments().forEach(apt -> {
+            csv.append(apt.getId()).append(",")
+               .append(apt.getCustomerName()).append(",")
+               .append(apt.getAgentName()).append(",")
+               .append(apt.getAppointmentDateTime()).append(",")
+               .append(apt.getStatus()).append(",")
+               .append(apt.getType()).append("\n");
+        });
+        
+        return csv.toString();
+    }
+    
+    public Map<String, Object> exportAnalyticsAsJSON() {
+        AnalyticsDTO analytics = getAdminAnalytics();
+        Map<String, Object> export = new HashMap<>();
+        
+        export.put("generatedAt", LocalDateTime.now().toString());
+        
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("totalAppointments", analytics.getTotalAppointments() != null ? analytics.getTotalAppointments() : 0);
+        summary.put("totalUsers", analytics.getTotalUsers() != null ? analytics.getTotalUsers() : 0);
+        summary.put("totalAgents", analytics.getTotalAgents() != null ? analytics.getTotalAgents() : 0);
+        summary.put("totalPolicies", analytics.getTotalPolicies() != null ? analytics.getTotalPolicies() : 0);
+        summary.put("totalAIQueries", analytics.getTotalAIQueries() != null ? analytics.getTotalAIQueries() : 0);
+        export.put("summary", summary);
+        
+        Map<String, Object> statusMap = new HashMap<>();
+        statusMap.put("pending", analytics.getPendingAppointments() != null ? analytics.getPendingAppointments() : 0);
+        statusMap.put("confirmed", analytics.getConfirmedAppointments() != null ? analytics.getConfirmedAppointments() : 0);
+        statusMap.put("completed", analytics.getCompletedAppointments() != null ? analytics.getCompletedAppointments() : 0);
+        statusMap.put("cancelled", analytics.getCancelledAppointments() != null ? analytics.getCancelledAppointments() : 0);
+        export.put("appointmentsByStatus", statusMap);
+        
+        export.put("appointmentsByType", analytics.getAppointmentsByType() != null ? analytics.getAppointmentsByType() : new HashMap<>());
+        export.put("recentAppointments", analytics.getRecentAppointments() != null ? analytics.getRecentAppointments() : new ArrayList<>());
+        export.put("topAgents", analytics.getTopAgents() != null ? analytics.getTopAgents() : new ArrayList<>());
+        
+        return export;
+    }
 }

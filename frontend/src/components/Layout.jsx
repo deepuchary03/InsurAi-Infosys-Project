@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Users,
   MessageSquare,
+  Shield,
 } from "lucide-react";
 import { getUser, clearAuthData, isAdmin, isAgent } from "../utils/auth";
 import Aurora from "./Aurora";
@@ -83,6 +84,16 @@ const Layout = ({ children }) => {
                   >
                     <Users size={20} />
                     <span>Agents</span>
+                  </Link>
+                )}
+
+                {!isAdmin() && !isAgent() && (
+                  <Link
+                    to="/policies"
+                    className="flex items-center space-x-1 text-gray-200 hover:text-purple-400 transition-all duration-300 px-3 py-2 rounded-lg hover:bg-white/10 hover:backdrop-blur-sm"
+                  >
+                    <Shield size={20} />
+                    <span>Policies</span>
                   </Link>
                 )}
 

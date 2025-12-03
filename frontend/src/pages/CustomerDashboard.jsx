@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import Layout from "../components/Layout";
-import { appointmentService, agentService } from "../services/api";
+import { appointmentService, agentService, policyService } from "../services/api";
 import { getUser } from "../utils/auth";
-import { Calendar, Clock, User, TrendingUp } from "lucide-react";
+import { Calendar, Clock, User, TrendingUp, Shield } from "lucide-react";
 import { formatDateTime } from "../utils/dateFormatter";
 import { appointmentStatusColors } from "../utils/constants";
 import { Link } from "react-router-dom";
@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 const CustomerDashboard = () => {
   const [appointments, setAppointments] = useState([]);
   const [agents, setAgents] = useState([]);
+  const [policies, setPolicies] = useState([]);
   const [loading, setLoading] = useState(true);
   const user = getUser();
 
@@ -19,12 +20,14 @@ const CustomerDashboard = () => {
 
   const fetchData = async () => {
     try {
-      const [appointmentsRes, agentsRes] = await Promise.all([
+      const [appointmentsRes, agentsRes, policiesRes] = await Promise.all([
         appointmentService.getCustomerAppointments(user.id),
         agentService.getTopAgents(),
+        policyService.getPoliciesByCustomer(user.id),
       ]);
       setAppointments(appointmentsRes.data);
       setAgents(agentsRes.data);
+      setPolicies(policiesRes.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -60,10 +63,16 @@ const CustomerDashboard = () => {
       color: "bg-green-500",
     },
     {
+      label: "Active Policies",
+      value: policies.filter((p) => p.status === "ACTIVE").length,
+      icon: Shield,
+      color: "bg-purple-500",
+    },
+    {
       label: "Available Agents",
       value: agents.length,
       icon: User,
-      color: "bg-purple-500",
+      color: "bg-orange-500",
     },
   ];
 
@@ -90,7 +99,7 @@ const CustomerDashboard = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {stats.map((stat, index) => (
             <div key={index} className="card">
               <div className="flex items-center justify-between">
@@ -115,9 +124,12 @@ const CustomerDashboard = () => {
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             Quick Actions
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Link to="/book-appointment" className="btn btn-primary">
               Book Appointment
+            </Link>
+            <Link to="/browse-policies" className="btn btn-primary">
+              Browse Policies
             </Link>
             <Link to="/agents" className="btn btn-secondary">
               View All Agents
@@ -126,6 +138,69 @@ const CustomerDashboard = () => {
               Ask AI Assistant
             </Link>
           </div>
+        </div>
+
+        {/* My Policies */}
+        <div className="card">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">
+              My Policies
+            </h2>
+            <Link
+              to="/policies"
+              className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+            >
+              View all →
+            </Link>
+          </div>
+          {policies.length === 0 ? (
+            <div className="text-center py-8">
+              <Shield size={48} className="mx-auto text-gray-400 mb-3" />
+              <p className="text-gray-600 mb-4">No policies yet</p>
+              <Link to="/browse-policies" className="btn btn-primary inline-block">
+                Browse Available Policies
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {policies.slice(0, 3).map((policy) => (
+                <div
+                  key={policy.id}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                      <Shield className="text-purple-600" size={20} />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        {policy.policyName}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {policy.type} • ${policy.monthlyPremium}/month
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Coverage: ${policy.coverageAmount?.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      policy.status === "ACTIVE"
+                        ? "bg-green-100 text-green-700"
+                        : policy.status === "PENDING"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : policy.status === "EXPIRED"
+                        ? "bg-gray-100 text-gray-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {policy.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Upcoming Appointments */}

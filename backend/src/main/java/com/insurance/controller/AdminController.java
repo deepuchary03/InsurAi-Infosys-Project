@@ -5,6 +5,8 @@ import com.insurance.entity.User;
 import com.insurance.service.AnalyticsService;
 import com.insurance.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -49,5 +51,23 @@ public class AdminController {
     public ResponseEntity<User> updateUserRole(@PathVariable Long userId, @RequestBody Map<String, String> payload) {
         String role = payload.get("role");
         return ResponseEntity.ok(userService.updateUserRole(userId, role));
+    }
+    
+    @GetMapping("/analytics/export/csv")
+    public ResponseEntity<String> exportAnalyticsCSV() {
+        String csv = analyticsService.exportAnalyticsAsCSV();
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("text/csv"));
+        headers.setContentDispositionFormData("attachment", "analytics-report.csv");
+        
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(csv);
+    }
+    
+    @GetMapping("/analytics/export/json")
+    public ResponseEntity<Map<String, Object>> exportAnalyticsJSON() {
+        return ResponseEntity.ok(analyticsService.exportAnalyticsAsJSON());
     }
 }
