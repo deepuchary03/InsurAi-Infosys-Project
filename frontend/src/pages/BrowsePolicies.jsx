@@ -79,8 +79,7 @@ const BrowsePolicies = () => {
       name: "Home Insurance",
       icon: Home,
       color: "orange",
-      description:
-        "Protect your home and belongings against damages and theft",
+      description: "Protect your home and belongings against damages and theft",
       coverageOptions: [150000, 300000, 500000],
       monthlyPremium: [60, 110, 180],
       benefits: [

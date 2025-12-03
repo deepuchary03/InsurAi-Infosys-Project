@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Shield, FileText, Calendar, DollarSign, CheckCircle, XCircle } from "lucide-react";
+import {
+  Shield,
+  FileText,
+  Calendar,
+  DollarSign,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 import { policyService } from "../services/api";
 import { toast } from "react-toastify";
 import Aurora from "../components/Aurora";
@@ -76,7 +83,9 @@ const Policies = () => {
     const IconComponent = config.icon;
 
     return (
-      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${config.color}`}>
+      <span
+        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${config.color}`}
+      >
         <IconComponent size={14} />
         {status}
       </span>
@@ -109,32 +118,40 @@ const Policies = () => {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">My Insurance Policies</h1>
-          <p className="text-gray-300">Manage and view all your insurance policies</p>
+          <h1 className="text-4xl font-bold text-white mb-2">
+            My Insurance Policies
+          </h1>
+          <p className="text-gray-300">
+            Manage and view all your insurance policies
+          </p>
         </div>
 
         {/* Filters */}
         <div className="mb-6 flex flex-wrap gap-2">
-          {["ALL", "ACTIVE", "PENDING", "EXPIRED", "CANCELLED"].map((status) => (
-            <button
-              key={status}
-              onClick={() => setFilter(status)}
-              className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                filter === status
-                  ? "bg-primary-600 text-white"
-                  : "bg-white/10 text-white hover:bg-white/20"
-              }`}
-            >
-              {status}
-            </button>
-          ))}
+          {["ALL", "ACTIVE", "PENDING", "EXPIRED", "CANCELLED"].map(
+            (status) => (
+              <button
+                key={status}
+                onClick={() => setFilter(status)}
+                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                  filter === status
+                    ? "bg-primary-600 text-white"
+                    : "bg-white/10 text-white hover:bg-white/20"
+                }`}
+              >
+                {status}
+              </button>
+            )
+          )}
         </div>
 
         {/* Policies Grid */}
         {filteredPolicies.length === 0 ? (
           <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-12 text-center">
             <Shield size={64} className="mx-auto text-gray-400 mb-4" />
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">No Policies Found</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              No Policies Found
+            </h3>
             <p className="text-gray-600 mb-6">
               {filter === "ALL"
                 ? "You don't have any insurance policies yet."
@@ -155,14 +172,16 @@ const Policies = () => {
                 className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden border border-white/20 hover:shadow-3xl transition-all"
               >
                 <div className={`${getPolicyTypeColor(policy.type)} h-2`}></div>
-                
+
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <h3 className="text-xl font-bold text-gray-900 mb-1">
                         {policy.policyName}
                       </h3>
-                      <p className="text-sm text-gray-500">{policy.policyNumber}</p>
+                      <p className="text-sm text-gray-500">
+                        {policy.policyNumber}
+                      </p>
                     </div>
                     {getStatusBadge(policy.status)}
                   </div>
@@ -190,7 +209,9 @@ const Policies = () => {
                     {policy.agentName && (
                       <div className="flex items-center text-gray-700">
                         <FileText size={18} className="mr-2 text-gray-400" />
-                        <span className="text-sm">Agent: {policy.agentName}</span>
+                        <span className="text-sm">
+                          Agent: {policy.agentName}
+                        </span>
                       </div>
                     )}
                   </div>

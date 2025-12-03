@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import Layout from "../components/Layout";
-import { appointmentService, agentService, policyService } from "../services/api";
+import {
+  appointmentService,
+  agentService,
+  policyService,
+} from "../services/api";
 import { getUser } from "../utils/auth";
 import { Calendar, Clock, User, TrendingUp, Shield } from "lucide-react";
 import { formatDateTime } from "../utils/dateFormatter";
@@ -143,9 +147,7 @@ const CustomerDashboard = () => {
         {/* My Policies */}
         <div className="card">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">
-              My Policies
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-900">My Policies</h2>
             <Link
               to="/policies"
               className="text-primary-600 hover:text-primary-700 text-sm font-medium"
@@ -157,7 +159,10 @@ const CustomerDashboard = () => {
             <div className="text-center py-8">
               <Shield size={48} className="mx-auto text-gray-400 mb-3" />
               <p className="text-gray-600 mb-4">No policies yet</p>
-              <Link to="/browse-policies" className="btn btn-primary inline-block">
+              <Link
+                to="/browse-policies"
+                className="btn btn-primary inline-block"
+              >
                 Browse Available Policies
               </Link>
             </div>

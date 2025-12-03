@@ -128,7 +128,8 @@ export const aiService = {
 export const policyService = {
   getAllPolicies: () => api.get("/policies"),
   getPolicyById: (id) => api.get(`/policies/${id}`),
-  getPoliciesByCustomer: (customerId) => api.get(`/policies/customer/${customerId}`),
+  getPoliciesByCustomer: (customerId) =>
+    api.get(`/policies/customer/${customerId}`),
   getPoliciesByAgent: (agentId) => api.get(`/policies/agent/${agentId}`),
   purchasePolicy: (data) => api.post("/policies/purchase", data),
   updatePolicy: (id, data) => api.put(`/policies/${id}`, data),

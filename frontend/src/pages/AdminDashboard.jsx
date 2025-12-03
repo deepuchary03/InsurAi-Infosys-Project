@@ -123,7 +123,9 @@ const AdminDashboard = () => {
     try {
       const token = localStorage.getItem("accessToken");
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:8081/api/v1"}/admin/analytics/export/csv`,
+        `${
+          import.meta.env.VITE_API_URL || "http://localhost:8081/api/v1"
+        }/admin/analytics/export/csv`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -137,7 +139,9 @@ const AdminDashboard = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `analytics-report-${new Date().toISOString().split("T")[0]}.csv`;
+      a.download = `analytics-report-${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -158,7 +162,9 @@ const AdminDashboard = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `analytics-report-${new Date().toISOString().split("T")[0]}.json`;
+      a.download = `analytics-report-${
+        new Date().toISOString().split("T")[0]
+      }.json`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -456,8 +462,12 @@ const AdminDashboard = () => {
           <div className="card">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">Export Analytics</h2>
-                <p className="text-gray-600 text-sm mt-1">Download analytics reports in your preferred format</p>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Export Analytics
+                </h2>
+                <p className="text-gray-600 text-sm mt-1">
+                  Download analytics reports in your preferred format
+                </p>
               </div>
               <div className="flex space-x-3">
                 <button
@@ -1217,7 +1227,9 @@ const AdminDashboard = () => {
         {activeTab === "policies" && (
           <div className="card">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Insurance Policies</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Insurance Policies
+              </h2>
             </div>
 
             <div className="overflow-x-auto">
@@ -1297,7 +1309,11 @@ const AdminDashboard = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
                           onClick={async () => {
-                            if (window.confirm("Are you sure you want to delete this policy?")) {
+                            if (
+                              window.confirm(
+                                "Are you sure you want to delete this policy?"
+                              )
+                            ) {
                               try {
                                 await policyService.deletePolicy(policy.id);
                                 toast.success("Policy deleted successfully");
