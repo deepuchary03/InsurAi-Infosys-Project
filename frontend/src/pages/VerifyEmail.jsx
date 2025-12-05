@@ -23,33 +23,33 @@ const VerifyEmail = () => {
 
   const verifyEmail = async () => {
     try {
-      // Set success immediately to show positive feedback
+      await authService.verifyEmail(token);
+
+      // Only show success after successful verification
       setStatus("success");
       setMessage("Your email has been verified successfully!");
-
-      await authService.verifyEmail(token);
       toast.success("Email verified! Redirecting to login...");
       setTimeout(() => navigate("/login"), 3000);
     } catch (error) {
-      // Only show error if verification actually fails
       const errorMessage = error.response?.data?.message || "";
 
       // If the error indicates already verified, show success instead
       if (
-        errorMessage.includes("already verified") ||
-        errorMessage.includes("already been verified")
+        errorMessage.toLowerCase().includes("already verified") ||
+        errorMessage.toLowerCase().includes("already been verified")
       ) {
         setStatus("success");
         setMessage("Your email has already been verified!");
         toast.success("Email already verified! Redirecting to login...");
         setTimeout(() => navigate("/login"), 3000);
       } else {
+        // Only show error for actual failures
         setStatus("error");
         setMessage(
           errorMessage ||
-            "Verification failed. Token may be expired or invalid."
+            "Verification failed. The verification link may have expired."
         );
-        toast.error("Email verification failed. Token may be expired.");
+        toast.error("Email verification failed.");
       }
     }
   };

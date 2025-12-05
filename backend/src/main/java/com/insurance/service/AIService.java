@@ -92,11 +92,37 @@ public class AIService {
                     .build();
                     
         } catch (Exception e) {
+            System.err.println("=== AI Service Error ===");
+            System.err.println("Error processing query: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Provide fallback responses for common questions
+            String fallbackAnswer = getFallbackResponse(request.getQuestion());
+            String category = categorizeQuery(request.getQuestion());
+            boolean canBookAppointment = detectAppointmentIntent(request.getQuestion());
+            
+            // Log failed query
+            try {
+                AIQueryLog log = AIQueryLog.builder()
+                        .user(user)
+                        .question(request.getQuestion())
+                        .answer(fallbackAnswer)
+                        .isVoiceQuery(request.getIsVoiceQuery())
+                        .category(category)
+                        .responseTime((int) Duration.between(startTime, Instant.now()).toMillis())
+                        .wasHelpful(false)
+                        .build();
+                queryLogRepository.save(log);
+            } catch (Exception logError) {
+                System.err.println("Failed to log error: " + logError.getMessage());
+            }
+            
             return AIQueryResponse.builder()
-                    .answer("I apologize, but I'm having trouble processing your request right now. Please try again or contact our support team.")
-                    .category("ERROR")
+                    .answer(fallbackAnswer)
+                    .category(category)
                     .responseTime((int) Duration.between(startTime, Instant.now()).toMillis())
-                    .canBookAppointment(false)
+                    .canBookAppointment(canBookAppointment)
+                    .suggestedAction(canBookAppointment ? "Book an appointment with our agent" : null)
                     .build();
         }
     }
@@ -209,19 +235,29 @@ public class AIService {
                "\n- Auto Insurance: Comprehensive and collision coverage for vehicles" +
                "\n- Home Insurance: Property, contents, and liability coverage" +
                "\n- Business Insurance: Commercial property, liability, and workers comp" +
+               "\n- Travel Insurance: Trip cancellation, medical emergency, lost baggage coverage" +
+               "\n- Disability Insurance: Short-term and long-term disability protection" +
                agentInfo.toString() +
                "\n\nOur specialized agents are available to help with:" +
                "\n- Personalized policy recommendations" +
                "\n- Claims assistance and guidance" +
                "\n- Policy reviews and renewals" +
                "\n- Coverage analysis and optimization" +
+               "\n\nClaims Process:" +
+               "\n1. Report the incident immediately through our portal or by contacting your agent" +
+               "\n2. Gather all necessary documentation (photos, police reports, medical records, receipts)" +
+               "\n3. Submit your claim with complete information" +
+               "\n4. Our claims team reviews within 24-48 hours" +
+               "\n5. We process approved claims within 5-7 business days" +
+               "\n6. You can track your claim status in real-time through your dashboard" +
+               "\n\nFor claims assistance, our agents are specially trained to guide you through the entire process." +
                "\n\nWhen asked about agents, use the REAL agent data provided above. " +
                "If the question is about booking an appointment or speaking with an agent, " +
                "enthusiastically encourage them to connect with one of our expert insurance specialists. " +
-               "Tell them they can say 'show available agents' or 'book an appointment' to see available agents " +
-               "and schedule a consultation immediately." +
+               "Tell them they can book an appointment through the 'Appointments' section to speak with an agent." +
                "\n\nQuestion: " + question + 
-               "\n\nProvide a clear, helpful answer in 2-4 sentences using the REAL data above. Be conversational, warm, and natural.";
+               "\n\nProvide a clear, helpful answer in 2-4 sentences. Be conversational, warm, and natural. " +
+               "ALWAYS give a proper answer - never say you can't help with simple questions like claims filing.";
     }
     
     private String categorizeQuery(String question) {
@@ -261,5 +297,34 @@ public class AIService {
                lowerQuestion.contains("discuss") ||
                lowerQuestion.contains("call me") ||
                lowerQuestion.contains("contact");
+    }
+    
+    private String getFallbackResponse(String question) {
+        String lowerQuestion = question.toLowerCase();
+        
+        if (lowerQuestion.contains("claim") || lowerQuestion.contains("file a claim")) {
+            return "To file a claim, follow these steps:\n" +
+                   "1. Report the incident immediately through your dashboard or contact your assigned agent\n" +
+                   "2. Gather all necessary documentation (photos, reports, receipts)\n" +
+                   "3. Submit your claim with complete information\n" +
+                   "4. Our team reviews claims within 24-48 hours\n" +
+                   "5. Approved claims are processed in 5-7 business days\n" +
+                   "You can track your claim status in real-time. Need help? Book an appointment with one of our agents!";
+        } else if (lowerQuestion.contains("policy") || lowerQuestion.contains("coverage")) {
+            return "We offer Life, Health, Auto, Home, Business, Travel, and Disability insurance. " +
+                   "Each policy can be customized to your needs. Visit the 'Browse Policies' section to explore options " +
+                   "or book an appointment with an agent for personalized recommendations!";
+        } else if (lowerQuestion.contains("premium") || lowerQuestion.contains("cost") || lowerQuestion.contains("price")) {
+            return "Premium costs vary based on coverage type, amount, and duration. " +
+                   "Check our 'Browse Policies' page for starting prices, or schedule a consultation " +
+                   "with our agents for a detailed quote tailored to your needs!";
+        } else if (lowerQuestion.contains("agent") || lowerQuestion.contains("appointment")) {
+            return "Our experienced agents are ready to help! You can view available agents and book appointments " +
+                   "in the 'Appointments' section. They can assist with policy selection, claims, and any questions you have!";
+        } else {
+            return "I'm here to help with insurance questions! You can ask me about:\n" +
+                   "• Filing claims\n• Policy types and coverage\n• Premium costs\n• Booking appointments with agents\n" +
+                   "What would you like to know?";
+        }
     }
 }

@@ -269,7 +269,7 @@ public class AnalyticsService {
         
         export.put("appointmentsByType", analytics.getAppointmentsByType() != null ? analytics.getAppointmentsByType() : new HashMap<>());
         export.put("recentAppointments", analytics.getRecentAppointments() != null ? analytics.getRecentAppointments() : new ArrayList<>());
-        export.put("topAgents", analytics.getTopAgents() != null ? analytics.getTopAgents() : new ArrayList<>());
+
         
         return export;
     }
